@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urna Eletrônica - TCC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗳️ Urna Eletrônica</h1>
+            <p>Justiça Eleitoral - Sistema de Votação</p>
+        </header>
+
+        <div class="urna">
+            <!-- Tela da Urna -->
+            <div class="tela">
+                <div id="display">
+                    <div class="titulo">SEU VOTO PARA</div>
+                    <div class="cargo">PREFEITO</div>
+                    <div class="numeros">
+                        <span id="numero1">_</span>
+                        <span id="numero2">_</span>
+                    </div>
+                    <div class="info">
+                        <div id="nome-candidato">NOME DO CANDIDATO</div>
+                        <div id="partido">PARTIDO</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teclado -->
+            <div class="teclado">
+                <div class="linha">
+                    <button onclick="pressionarTecla(1)">1</button>
+                    <button onclick="pressionarTecla(2)">2</button>
+                    <button onclick="pressionarTecla(3)">3</button>
+                </div>
+                <div class="linha">
+                    <button onclick="pressionarTecla(4)">4</button>
+                    <button onclick="pressionarTecla(5)">5</button>
+                    <button onclick="pressionarTecla(6)">6</button>
+                </div>
+                <div class="linha">
+                    <button onclick="pressionarTecla(7)">7</button>
+                    <button onclick="pressionarTecla(8)">8</button>
+                    <button onclick="pressionarTecla(9)">9</button>
+                </div>
+                <div class="linha">
+                    <button onclick="pressionarTecla(0)">0</button>
+                    <button onclick="branco()" class="branco">BRANCO</button>
+                    <button onclick="corrige()" class="corrige">CORRIGE</button>
+                </div>
+                <div class="linha">
+                    <button onclick="confirma()" class="confirma">CONFIRMA</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controles">
+            <button onclick="exportarResultados()" class="btn-exportar">
+                📊 Exportar Resultados
+            </button>
+            <button onclick="limparUrna()" class="btn-limpar">
+                🗑️ Limpar Urna
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

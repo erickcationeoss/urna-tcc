@@ -1,0 +1,185 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #2c3e50;
+    color: white;
+    border-radius: 10px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.urna {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.tela {
+    flex: 1;
+    min-width: 300px;
+    background: #34495e;
+    border: 5px solid #2c3e50;
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+}
+
+#display {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 20px;
+    border-radius: 8px;
+    min-height: 200px;
+}
+
+.titulo {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #7f8c8d;
+}
+
+.cargo {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.numeros {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.numeros span {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #bdc3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.info {
+    border-top: 2px solid #bdc3c7;
+    padding-top: 10px;
+}
+
+#nome-candidato {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+#partido {
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.teclado {
+    flex: 1;
+    min-width: 250px;
+}
+
+.linha {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+button {
+    flex: 1;
+    padding: 15px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.branco {
+    background: #f39c12;
+    color: white;
+}
+
+.corrige {
+    background: #e74c3c;
+    color: white;
+}
+
+.confirma {
+    background: #27ae60;
+    color: white;
+    font-weight: bold;
+}
+
+.controles {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.btn-exportar, .btn-limpar {
+    padding: 15px 30px;
+    font-size: 1.1em;
+}
+
+.btn-exportar {
+    background: #3498db;
+    color: white;
+}
+
+.btn-limpar {
+    background: #e74c3c;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .urna {
+        flex-direction: column;
+    }
+    
+    .teclado {
+        order: -1;
+    }
+}
