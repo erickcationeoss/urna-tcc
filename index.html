@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Urna Eletrônica Universal</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="light-theme">
     <div class="container">
@@ -22,6 +23,9 @@
                 <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
                 <button onclick="toggleAdmin()" class="btn-admin" id="admin-btn">
                     🔧
+                </button>
+                <button onclick="sincronizarVotosOffline()" class="btn-sync" title="Sincronizar votos offline">
+                    🔄
                 </button>
             </div>
         </header>
@@ -128,6 +132,9 @@
                     </button>
                     <button onclick="limparVotos()" class="btn-control danger">
                         🗑️ Limpar
+                    </button>
+                    <button onclick="sincronizarVotosOffline()" class="btn-control">
+                        🔄 Sincronizar
                     </button>
                 </div>
             </div>

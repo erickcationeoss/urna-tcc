@@ -489,3 +489,12 @@ body.dark-theme {
     background: var(--text-secondary);
     border-radius: 3px;
 }
+.btn-sync {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-tertiary);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
