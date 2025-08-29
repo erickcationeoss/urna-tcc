@@ -1,6 +1,6 @@
 // Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS
 const SUPABASE_URL = 'https://xvxrxzjunbeuajpzazhl.supabase.co';
-const SUPABASE_ANON_KEY = 'xvxrxzjunbeuajpzazhl';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2eHJ4emp1bmJldWFqcHphemhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzU0MzYsImV4cCI6MjA3MjA1MTQzNn0.ckHqVnUgieW6xIEm9k0XxtD4B9D_qnPcFs2G-FuUmiU';
 
 // Inicializar o cliente Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
