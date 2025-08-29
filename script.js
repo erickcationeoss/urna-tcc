@@ -1,10 +1,9 @@
 // Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS
-const SUPABASE_URL = 'https://seu-projeto.supabase.co';
-const SUPABASE_ANON_KEY = 'sua-chave-anon-publica';
+const SUPABASE_URL = 'https://xvxrxzjunbeuajpzazhl.supabase.co';
+const SUPABASE_ANON_KEY = 'xvxrxzjunbeuajpzazhl';
 
-// Inicializar o cliente Supabase CORRETAMENTE
-const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicializar o cliente Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Sistema de notificação
 function showNotification(message, type = 'success') {
@@ -79,7 +78,6 @@ const ADMIN_PASSWORD = "admin123";
 
 // Controle de sincronização
 let isSyncing = false;
-let syncQueue = [];
 
 // Inicialização
 async function inicializar() {
@@ -421,14 +419,16 @@ async function salvarVotoOnline(voto) {
                 { 
                     cargo: voto.cargo, 
                     numero: voto.numero, 
-                    candidato: voto.candidato,
-                    timestamp: voto.timestamp
+                    candidato: voto.candidato
+                    // O campo created_at será preenchido automaticamente pelo Supabase
                 }
             ]);
             
         if (error) {
             console.error('Erro ao salvar no Supabase:', error);
             adicionarParaSincronizacao(voto);
+        } else {
+            console.log('Voto salvo com sucesso no Supabase');
         }
     } catch (e) {
         console.error('Exceção ao salvar online:', e);
@@ -441,6 +441,7 @@ function adicionarParaSincronizacao(voto) {
     let pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
     pendentes.push(voto);
     localStorage.setItem('votosPendentes', JSON.stringify(pendentes));
+    showNotification('Voto salvo localmente (sem conexão)', 'info');
 }
 
 // Verificar votos pendentes
@@ -458,11 +459,10 @@ async function sincronizarVotosOffline() {
         return;
     }
     
-    const votos = JSON.parse(localStorage.getItem('votosPendentes')) || [];
-    const votosLocal = JSON.parse(localStorage.getItem('votos')) || [];
+    const votosPendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
     
-    if (votos.length === 0 && votosLocal.length === 0) {
-        showNotification('Nenhum voto offline para sincronizar.', 'info');
+    if (votosPendentes.length === 0) {
+        showNotification('Nenhum voto pendente para sincronizar.', 'info');
         return;
     }
     
@@ -472,80 +472,65 @@ async function sincronizarVotosOffline() {
     
     try {
         if (syncButton) {
-            syncButton.innerHTML = '⏳';
+            syncButton.innerHTML = '⏳ Sincronizando...';
             syncButton.disabled = true;
         }
         
-        showNotification(`Iniciando sincronização de ${votos.length + votosLocal.length} votos...`, 'info');
+        showNotification(`Sincronizando ${votosPendentes.length} votos...`, 'info');
         
         let successCount = 0;
         let errorCount = 0;
         
-        // Sincronizar votos pendentes primeiro
-        for (let i = 0; i < votos.length; i++) {
-            if (!navigator.onLine) {
-                throw new Error('Conexão perdida durante a sincronização');
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('votos')
-                    .insert([votos[i]]);
-                
-                if (!error) {
-                    successCount++;
-                    // Remove o voto sincronizado
-                    votos.splice(i, 1);
-                    i--; // Ajusta o índice após remoção
-                    localStorage.setItem('votosPendentes', JSON.stringify(votos));
-                } else {
-                    errorCount++;
-                    console.error('Erro ao sincronizar voto:', error);
-                }
-                
-                // Pequena pausa para não sobrecarregar
-                await new Promise(resolve => setTimeout(resolve, 50));
-                
-            } catch (error) {
-                errorCount++;
-                console.error('Erro no voto individual:', error);
-            }
-        }
+        // Criar uma cópia para trabalhar
+        const votosParaSincronizar = [...votosPendentes];
         
-        // Sincronizar votos locais (backup)
-        for (let i = 0; i < votosLocal.length; i++) {
+        for (let i = 0; i < votosParaSincronizar.length; i++) {
+            const voto = votosParaSincronizar[i];
+            
             if (!navigator.onLine) {
-                throw new Error('Conexão perdida durante a sincronização');
+                showNotification('Conexão perdida durante a sincronização', 'error');
+                break;
             }
             
             try {
                 const { error } = await supabase
                     .from('votos')
-                    .insert([votosLocal[i]]);
+                    .insert([{
+                        cargo: voto.cargo,
+                        numero: voto.numero,
+                        candidato: voto.candidato
+                    }]);
                 
-                if (!error) {
-                    successCount++;
-                    // Remove o voto sincronizado
-                    votosLocal.splice(i, 1);
-                    i--;
-                    localStorage.setItem('votos', JSON.stringify(votosLocal));
-                } else {
+                if (error) {
+                    console.error('Erro ao sincronizar voto:', error);
                     errorCount++;
-                    console.error('Erro ao sincronizar voto local:', error);
+                } else {
+                    successCount++;
+                    // Remove o voto sincronizado da lista original
+                    votosPendentes.splice(votosPendentes.findIndex(v => 
+                        v.cargo === voto.cargo && 
+                        v.numero === voto.numero && 
+                        v.timestamp === voto.timestamp
+                    ), 1);
+                    
+                    localStorage.setItem('votosPendentes', JSON.stringify(votosPendentes));
                 }
                 
-                await new Promise(resolve => setTimeout(resolve, 50));
+                // Pequena pausa para não sobrecarregar o servidor
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
             } catch (error) {
+                console.error('Erro no voto individual:', error);
                 errorCount++;
-                console.error('Erro no voto local individual:', error);
             }
         }
         
         if (successCount > 0) {
-            showNotification(`Sincronização concluída! ${successCount} votos sincronizados, ${errorCount} erros.`, 'success');
-        } else if (errorCount > 0) {
-            showNotification('Falha na sincronização. Tente novamente.', 'error');
+            showNotification(`Sincronização concluída! ${successCount} votos sincronizados.`, 'success');
+        }
+        
+        if (errorCount > 0) {
+            showNotification(`${errorCount} votos não puderam ser sincronizados.`, 'warning');
         }
         
     } catch (error) {
@@ -562,27 +547,45 @@ async function sincronizarVotosOffline() {
 
 // Gerenciamento de dados
 async function exportarResultados() {
-    const votos = JSON.parse(localStorage.getItem('votos')) || [];
-    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
-    const todosVotos = [...votos, ...pendentes];
-    
-    if (todosVotos.length === 0) {
-        showNotification('Nenhum voto registrado ainda!', 'warning');
-        return;
+    try {
+        const votos = JSON.parse(localStorage.getItem('votos')) || [];
+        const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+        const todosVotos = [...votos, ...pendentes];
+        
+        if (todosVotos.length === 0) {
+            showNotification('Nenhum voto registrado ainda!', 'warning');
+            return;
+        }
+        
+        const resultados = calcularResultados(todosVotos);
+        const dados = {
+            configuracao: configuracao,
+            votos: todosVotos,
+            resultados: resultados,
+            totalVotos: todosVotos.length,
+            exportadoEm: new Date().toISOString()
+        };
+        
+        // Salvar no Supabase na tabela resultados_exportados
+        const { error } = await supabase
+            .from('resultados_exportados')
+            .insert([{ dados: dados }]);
+            
+        if (error) {
+            console.error('Erro ao salvar resultados no Supabase:', error);
+            showNotification('Erro ao exportar para o Supabase', 'error');
+        } else {
+            showNotification('Resultados exportados para o Supabase!', 'success');
+        }
+        
+        // Também fazer download do JSON localmente
+        fazerDownload(JSON.stringify(dados, null, 2), 'resultados-eleicao.json');
+        showNotification(`Resultados exportados! Total: ${todosVotos.length} votos`);
+        
+    } catch (error) {
+        console.error('Erro ao exportar resultados:', error);
+        showNotification('Erro ao exportar resultados', 'error');
     }
-    
-    const resultados = calcularResultados(todosVotos);
-    const dados = {
-        configuracao: configuracao,
-        votos: todosVotos,
-        resultados: resultados,
-        totalVotos: todosVotos.length,
-        exportadoEm: new Date().toISOString()
-    };
-    
-    // Fazer download do JSON
-    fazerDownload(JSON.stringify(dados, null, 2), 'resultados-eleicao.json');
-    showNotification(`Resultados exportados! Total: ${todosVotos.length} votos`);
 }
 
 function calcularResultados(votos) {
