@@ -9,128 +9,295 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
-    max-width: 800px;
-    margin: 0 auto;
+    max-width: 900px;
+    width: 100%;
     background: white;
     border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    padding: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
 }
 
+/* Header */
 header {
     text-align: center;
     margin-bottom: 30px;
-    padding: 20px;
+    padding: 25px;
     background: #2c3e50;
     color: white;
-    border-radius: 10px;
+    border-radius: 12px;
+    position: relative;
 }
 
 header h1 {
-    font-size: 2.5em;
+    font-size: 2.8em;
     margin-bottom: 10px;
 }
 
-.urna {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+#titulo-eleicao-display {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    color: #ecf0f1;
 }
 
-.tela {
-    flex: 1;
-    min-width: 300px;
-    background: #34495e;
-    border: 5px solid #2c3e50;
-    border-radius: 10px;
-    padding: 20px;
+.btn-admin {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background: #f39c12;
     color: white;
-}
-
-#display {
-    background: #ecf0f1;
-    color: #2c3e50;
-    padding: 20px;
+    border: none;
     border-radius: 8px;
-    min-height: 200px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
 }
 
-.titulo {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #7f8c8d;
+.btn-admin:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
 }
 
-.cargo {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 20px;
+/* Painel Admin */
+.admin-panel {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid #dee2e6;
+}
+
+.admin-panel h2 {
     color: #2c3e50;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 2.2em;
 }
 
-.numeros {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    font-size: 2em;
-    font-weight: bold;
+.admin-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
 }
 
-.numeros span {
-    width: 50px;
-    height: 50px;
-    border: 2px solid #bdc3c7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px;
+.admin-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.4em;
 }
 
-.info {
-    border-top: 2px solid #bdc3c7;
-    padding-top: 10px;
-}
-
-#nome-candidato {
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-bottom: 5px;
-}
-
-#partido {
-    color: #7f8c8d;
-    font-style: italic;
-}
-
-.teclado {
-    flex: 1;
-    min-width: 250px;
-}
-
-.linha {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-button {
-    flex: 1;
+.admin-input {
+    width: 100%;
     padding: 15px;
-    font-size: 1.2em;
+    margin-bottom: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.1em;
+    transition: border-color 0.3s;
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.candidato-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1.5fr auto;
+    gap: 15px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.btn-adicionar {
+    padding: 15px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.lista-candidatos {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.candidato-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 1fr auto;
+    gap: 15px;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.candidato-item span {
+    font-weight: 500;
+}
+
+.btn-remover {
+    padding: 8px 15px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.admin-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.btn-salvar, .btn-voltar, .btn-limpar-tudo {
+    padding: 15px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
+.btn-salvar {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-voltar {
+    background: #3498db;
+    color: white;
+}
+
+.btn-limpar-tudo {
+    background: #e74c3c;
+    color: white;
+}
+
+/* Urna */
+.urna {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.tela {
+    flex: 1;
+    min-width: 350px;
+    background: #34495e;
+    border: 5px solid #2c3e50;
+    border-radius: 12px;
+    padding: 25px;
+    color: white;
+}
+
+#display {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 25px;
+    border-radius: 10px;
+    min-height: 250px;
+}
+
+.titulo {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #7f8c8d;
+    text-align: center;
+}
+
+.cargo {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.numeros {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    font-size: 2.5em;
+    font-weight: bold;
+    justify-content: center;
+}
+
+.numeros span {
+    width: 70px;
+    height: 70px;
+    border: 3px solid #bdc3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: white;
+}
+
+.info {
+    border-top: 3px solid #bdc3c7;
+    padding-top: 15px;
+    text-align: center;
+}
+
+#nome-candidato-display {
+    font-weight: bold;
+    font-size: 1.4em;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+#partido-display {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 1.2em;
+}
+
+.teclado {
+    flex: 1;
+    min-width: 280px;
+    max-width: 400px;
+}
+
+.linha {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+button {
+    flex: 1;
+    padding: 18px;
+    font-size: 1.3em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+}
+
 button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 button:active {
@@ -150,18 +317,20 @@ button:active {
 .confirma {
     background: #27ae60;
     color: white;
-    font-weight: bold;
+    font-size: 1.4em;
 }
 
 .controles {
     display: flex;
     gap: 20px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
-.btn-exportar, .btn-limpar {
-    padding: 15px 30px;
-    font-size: 1.1em;
+.btn-exportar, .btn-limpar, .btn-resultados {
+    padding: 18px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 .btn-exportar {
@@ -174,12 +343,45 @@ button:active {
     color: white;
 }
 
+.btn-resultados {
+    background: #9b59b6;
+    color: white;
+}
+
+/* Responsivo */
 @media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        margin: 10px;
+    }
+    
+    .candidato-form {
+        grid-template-columns: 1fr;
+    }
+    
     .urna {
         flex-direction: column;
     }
     
     .teclado {
         order: -1;
+    }
+    
+    .admin-buttons {
+        flex-direction: column;
+    }
+    
+    .controles {
+        flex-direction: column;
+    }
+    
+    header {
+        padding: 20px 15px;
+    }
+    
+    .btn-admin {
+        position: static;
+        margin-top: 15px;
+        width: 100%;
     }
 }
