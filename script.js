@@ -1,3 +1,32 @@
+// Sistema de notificação
+function showNotification(message, type = 'success') {
+    // Remove notificação anterior se existir
+    const existing = document.querySelector('.notification');
+    if (existing) {
+        existing.remove();
+    }
+
+    // Cria nova notificação
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Mostra a notificação
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Remove após 3 segundos
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
 // Configuração da eleição
 let configuracao = {
     titulo: 'Eleição Universal',
@@ -45,17 +74,17 @@ function adicionarCandidato() {
     const partido = document.getElementById('partido-candidato').value.trim();
     
     if (!numero || !nome || !partido) {
-        alert('Preencha todos os campos!');
+        showNotification('Preencha todos os campos!', 'error');
         return;
     }
     
     if (numero.length !== 2) {
-        alert('O número deve ter 2 dígitos!');
+        showNotification('O número deve ter 2 dígitos!', 'error');
         return;
     }
     
     if (configuracao.candidatos[numero]) {
-        alert('Já existe um candidato com este número!');
+        showNotification('Já existe um candidato com este número!', 'error');
         return;
     }
     
@@ -71,6 +100,7 @@ function adicionarCandidato() {
     
     atualizarListaCandidatos();
     salvarConfiguracao();
+    showNotification('Candidato adicionado com sucesso!');
 }
 
 function removerCandidato(numero) {
@@ -78,6 +108,7 @@ function removerCandidato(numero) {
         delete configuracao.candidatos[numero];
         atualizarListaCandidatos();
         salvarConfiguracao();
+        showNotification('Candidato removido com sucesso!');
     }
 }
 
@@ -103,7 +134,7 @@ function salvarConfiguracao() {
     configuracao.cargo = document.getElementById('cargo-eleicao').value;
     
     localStorage.setItem('configuracaoEleicao', JSON.stringify(configuracao));
-    alert('Configuração salva com sucesso!');
+    showNotification('Configuração salva com sucesso!');
     atualizarDisplayEleicao();
 }
 
@@ -170,7 +201,7 @@ function corrige() {
 
 function confirma() {
     if (votoAtual === '') {
-        alert('Digite um voto primeiro!');
+        showNotification('Digite um voto primeiro!', 'warning');
         return;
     }
 
@@ -183,7 +214,7 @@ function confirma() {
                   (votoAtual === 'BR' ? 'BRANCO' : 'NULO')
     });
 
-    alert('Voto confirmado com sucesso!');
+    showNotification('Voto confirmado com sucesso!');
     corrige();
 }
 
@@ -198,7 +229,7 @@ function exportarResultados() {
     const votos = JSON.parse(localStorage.getItem('votos')) || [];
     
     if (votos.length === 0) {
-        alert('Nenhum voto registrado ainda!');
+        showNotification('Nenhum voto registrado ainda!', 'warning');
         return;
     }
 
@@ -213,7 +244,7 @@ function exportarResultados() {
     }, null, 2);
 
     fazerDownload(dados, 'resultados-eleicao.json');
-    alert(`Resultados exportados! Total de votos: ${votos.length}`);
+    showNotification(`Resultados exportados! Total: ${votos.length} votos`);
 }
 
 function calcularResultados(votos) {
@@ -250,7 +281,7 @@ function visualizarResultados() {
     const votos = JSON.parse(localStorage.getItem('votos')) || [];
     
     if (votos.length === 0) {
-        alert('Nenhum voto registrado ainda!');
+        showNotification('Nenhum voto registrado ainda!', 'warning');
         return;
     }
 
@@ -269,7 +300,7 @@ function visualizarResultados() {
 function limparVotos() {
     if (confirm('Tem certeza que deseja limpar TODOS os votos? Esta ação não pode ser desfeita!')) {
         localStorage.removeItem('votos');
-        alert('Votos limpos com sucesso!');
+        showNotification('Votos limpos com sucesso!');
     }
 }
 
@@ -282,7 +313,7 @@ function limparTudo() {
             cargo: 'Representante',
             candidatos: {}
         };
-        alert('Todos os dados foram limpos!');
+        showNotification('Todos os dados foram limpos!');
         location.reload();
     }
 }
@@ -296,6 +327,10 @@ function carregarCandidatos() {
             '18': { nome: 'PEDRO COSTA', partido: 'CHAPA C' }
         };
     }
+}
+
+function atualizarInterfaceAdmin() {
+    // Função para atualizar interface admin se necessário
 }
 
 // Inicializar a urna

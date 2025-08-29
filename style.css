@@ -460,3 +460,37 @@ body {
 .lista-candidatos::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+/* Sistema de Notificação */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #27ae60;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.3s ease;
+    max-width: 300px;
+    font-weight: 500;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.notification.error {
+    background: #e74c3c;
+}
+
+.notification.warning {
+    background: #f39c12;
+}
+
+.notification.info {
+    background: #3498db;
+}
