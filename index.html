@@ -6,15 +6,24 @@
     <title>Urna Eletrônica Universal</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="light-theme">
     <div class="container">
         <!-- Header Centralizado -->
         <header class="header">
-            <h1>🗳️ URNA ELETRÔNICA</h1>
-            <p id="titulo-eleicao-display">Sistema de Votação Universal</p>
-            <button onclick="toggleAdmin()" class="btn-admin" id="admin-btn">
-                🔧 Modo Admin
-            </button>
+            <div>
+                <h1>🗳️ URNA ELETRÔNICA</h1>
+                <p id="titulo-eleicao-display">Sistema de Votação Universal</p>
+            </div>
+            
+            <div class="header-controls">
+                <div class="timer-container">
+                    ⏰ <span id="timer">00:00</span>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema Escuro</button>
+                <button onclick="toggleAdmin()" class="btn-admin" id="admin-btn">
+                    🔧 Modo Admin
+                </button>
+            </div>
         </header>
 
         <!-- Painel Principal -->

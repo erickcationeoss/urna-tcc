@@ -36,6 +36,9 @@ let configuracao = {
 
 let votoAtual = '';
 let modoAdmin = false;
+let tempoVotacao = 0;
+let timerInterval;
+const ADMIN_PASSWORD = "helenawysocki3bds";
 
 // Inicialização
 function inicializar() {
@@ -43,10 +46,71 @@ function inicializar() {
     carregarCandidatos();
     atualizarDisplay();
     atualizarInterfaceAdmin();
+    iniciarTimer();
+    aplicarTemaSalvo();
+}
+
+// Timer de votação
+function iniciarTimer() {
+    tempoVotacao = 0;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        tempoVotacao++;
+        atualizarTimer();
+    }, 1000);
+}
+
+function atualizarTimer() {
+    const minutos = Math.floor(tempoVotacao / 60);
+    const segundos = tempoVotacao % 60;
+    document.getElementById('timer').textContent = 
+        `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+}
+
+// Tema claro/escuro
+function toggleTheme() {
+    const body = document.body;
+    const themeToggle = document.querySelector('.theme-toggle');
+    
+    if (body.classList.contains('light-theme')) {
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Tema Claro';
+        localStorage.setItem('tema', 'escuro');
+    } else {
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        themeToggle.textContent = '🌙 Tema Escuro';
+        localStorage.setItem('tema', 'claro');
+    }
+}
+
+function aplicarTemaSalvo() {
+    const temaSalvo = localStorage.getItem('tema');
+    const themeToggle = document.querySelector('.theme-toggle');
+    
+    if (temaSalvo === 'escuro') {
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+        themeToggle.textContent = '☀️ Tema Claro';
+    } else {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        themeToggle.textContent = '🌙 Tema Escuro';
+        localStorage.setItem('tema', 'claro');
+    }
 }
 
 // Modo Admin
 function toggleAdmin() {
+    if (!modoAdmin) {
+        const senha = prompt("🔐 Digite a senha de administrador:");
+        if (senha !== ADMIN_PASSWORD) {
+            showNotification("Senha incorreta!", "error");
+            return;
+        }
+    }
+    
     modoAdmin = !modoAdmin;
     const adminPanel = document.getElementById('admin-panel');
     const votingPanel = document.getElementById('voting-panel');
