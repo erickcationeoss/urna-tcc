@@ -5,125 +5,170 @@
 }
 
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    padding: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
 }
 
 .container {
-    max-width: 900px;
     width: 100%;
+    max-width: 1200px;
     background: white;
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
-/* Header */
-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 25px;
+/* Header Centralizado */
+.header {
     background: #2c3e50;
     color: white;
-    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
     position: relative;
 }
 
-header h1 {
-    font-size: 2.8em;
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 300;
+    letter-spacing: 2px;
     margin-bottom: 10px;
 }
 
 #titulo-eleicao-display {
-    font-size: 1.3em;
-    margin-bottom: 15px;
-    color: #ecf0f1;
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin-bottom: 20px;
 }
 
 .btn-admin {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    background: #f39c12;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     color: white;
-    border: none;
-    border-radius: 8px;
+    padding: 12px 24px;
+    border-radius: 25px;
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .btn-admin:hover {
-    background: #e67e22;
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
+}
+
+/* Conteúdo Principal */
+.main-content {
+    padding: 40px;
 }
 
 /* Painel Admin */
 .admin-panel {
-    background: #f8f9fa;
-    padding: 30px;
-    border-radius: 12px;
-    border: 2px solid #dee2e6;
+    display: none;
 }
 
-.admin-panel h2 {
-    color: #2c3e50;
-    margin-bottom: 25px;
-    text-align: center;
-    font-size: 2.2em;
-}
-
-.admin-section {
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 30px;
-    padding: 20px;
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #dee2e6;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
 }
 
-.admin-section h3 {
+.admin-header h2 {
+    font-size: 1.8em;
+    font-weight: 300;
     color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: 1.4em;
 }
 
-.admin-input {
+.btn-fechar {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-fechar:hover {
+    background: #f8f9fa;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.admin-card {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.admin-card h3 {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.input-admin {
     width: 100%;
     padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1em;
     margin-bottom: 15px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 1.1em;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s ease;
 }
 
-.admin-input:focus {
+.input-admin:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: #667eea;
 }
 
 .candidato-form {
     display: grid;
-    grid-template-columns: 1fr 2fr 1.5fr auto;
+    grid-template-columns: 1fr;
     gap: 15px;
-    align-items: end;
-    margin-bottom: 20px;
 }
 
-.btn-adicionar {
-    padding: 15px;
+.btn-add {
     background: #27ae60;
     color: white;
     border: none;
-    border-radius: 8px;
+    padding: 15px;
+    border-radius: 10px;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: #219a52;
+    transform: translateY(-2px);
 }
 
 .lista-candidatos {
@@ -136,252 +181,282 @@ header h1 {
     grid-template-columns: 60px 1fr 1fr auto;
     gap: 15px;
     align-items: center;
-    padding: 12px;
+    padding: 15px;
     margin-bottom: 10px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
 }
 
-.candidato-item span {
-    font-weight: 500;
-}
-
-.btn-remover {
-    padding: 8px 15px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
-
-.admin-buttons {
-    display: flex;
+.controles-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 30px;
 }
 
-.btn-salvar, .btn-voltar, .btn-limpar-tudo {
-    padding: 15px 25px;
-    font-size: 1.1em;
-    font-weight: bold;
+.btn-save, .btn-clear, .btn-export {
+    padding: 15px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s;
+    font-size: 1em;
+    transition: all 0.3s ease;
 }
 
-.btn-salvar {
+.btn-save {
     background: #27ae60;
     color: white;
 }
 
-.btn-voltar {
-    background: #3498db;
-    color: white;
-}
-
-.btn-limpar-tudo {
+.btn-clear {
     background: #e74c3c;
     color: white;
 }
 
-/* Urna */
-.urna {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.tela {
-    flex: 1;
-    min-width: 350px;
-    background: #34495e;
-    border: 5px solid #2c3e50;
-    border-radius: 12px;
-    padding: 25px;
+.btn-export {
+    background: #3498db;
     color: white;
 }
 
-#display {
-    background: #ecf0f1;
+/* Painel de Votação */
+.voting-panel {
+    display: block;
+}
+
+.urna-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+    align-items: start;
+}
+
+.tela {
+    background: #2c3e50;
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+}
+
+.tela-content {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
     color: #2c3e50;
-    padding: 25px;
-    border-radius: 10px;
-    min-height: 250px;
+    text-align: center;
+}
+
+.tela-header {
+    margin-bottom: 30px;
 }
 
 .titulo {
-    font-size: 1.3em;
-    font-weight: bold;
-    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
     color: #7f8c8d;
-    text-align: center;
+    margin-bottom: 10px;
 }
 
 .cargo {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin-bottom: 25px;
+    font-size: 1.6em;
+    font-weight: 700;
     color: #2c3e50;
-    text-align: center;
 }
 
-.numeros {
+.numeros-display {
     display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-    font-size: 2.5em;
-    font-weight: bold;
     justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.numeros span {
-    width: 70px;
-    height: 70px;
+.numeros-display span {
+    width: 80px;
+    height: 80px;
     border: 3px solid #bdc3c7;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: white;
+    font-size: 2.5em;
+    font-weight: 700;
+    background: #f8f9fa;
 }
 
-.info {
-    border-top: 3px solid #bdc3c7;
-    padding-top: 15px;
-    text-align: center;
+.candidato-info {
+    border-top: 3px solid #e9ecef;
+    padding-top: 20px;
 }
 
-#nome-candidato-display {
-    font-weight: bold;
+.nome-candidato {
     font-size: 1.4em;
-    margin-bottom: 8px;
-    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 5px;
 }
 
-#partido-display {
+.partido-candidato {
+    font-size: 1.1em;
     color: #7f8c8d;
     font-style: italic;
-    font-size: 1.2em;
 }
 
+/* Teclado */
 .teclado {
-    flex: 1;
-    min-width: 280px;
-    max-width: 400px;
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid #e9ecef;
 }
 
-.linha {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
+.teclado-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
 }
 
-button {
-    flex: 1;
-    padding: 18px;
-    font-size: 1.3em;
+.tecla {
+    padding: 20px;
     border: none;
-    border-radius: 10px;
+    border-radius: 15px;
+    font-size: 1.3em;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
+    transition: all 0.3s ease;
+    background: white;
+    color: #2c3e50;
+    border: 2px solid #e9ecef;
 }
 
-button:hover {
+.tecla:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-button:active {
+.tecla:active {
     transform: translateY(0);
 }
 
 .branco {
     background: #f39c12;
     color: white;
+    border-color: #f39c12;
 }
 
 .corrige {
     background: #e74c3c;
     color: white;
+    border-color: #e74c3c;
 }
 
 .confirma {
     background: #27ae60;
     color: white;
-    font-size: 1.4em;
+    border-color: #27ae60;
+    grid-column: span 3;
+    font-size: 1.5em;
 }
 
-.controles {
-    display: flex;
+/* Controles */
+.controles-votacao {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
 }
 
-.btn-exportar, .btn-limpar, .btn-resultados {
-    padding: 18px 30px;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-.btn-exportar {
+.btn-control {
+    padding: 20px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
     background: #3498db;
     color: white;
 }
 
-.btn-limpar {
-    background: #e74c3c;
-    color: white;
+.btn-control:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.btn-resultados {
-    background: #9b59b6;
-    color: white;
+.btn-control.danger {
+    background: #e74c3c;
 }
 
 /* Responsivo */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-        margin: 10px;
-    }
-    
-    .candidato-form {
+@media (max-width: 968px) {
+    .admin-grid {
         grid-template-columns: 1fr;
     }
     
-    .urna {
-        flex-direction: column;
+    .urna-container {
+        grid-template-columns: 1fr;
     }
     
-    .teclado {
-        order: -1;
+    .candidato-item {
+        grid-template-columns: 1fr;
+        text-align: center;
     }
     
-    .admin-buttons {
-        flex-direction: column;
+    .controles-admin,
+    .controles-votacao {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        border-radius: 15px;
+        margin: 10px;
     }
     
-    .controles {
-        flex-direction: column;
+    .main-content {
+        padding: 20px;
     }
     
-    header {
-        padding: 20px 15px;
+    .header {
+        padding: 20px;
     }
     
-    .btn-admin {
-        position: static;
-        margin-top: 15px;
-        width: 100%;
+    .header h1 {
+        font-size: 2em;
     }
+    
+    .teclado-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .confirma {
+        grid-column: span 2;
+    }
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.admin-panel, .voting-panel {
+    animation: fadeIn 0.5s ease;
+}
+
+/* Scrollbar personalizada */
+.lista-candidatos::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lista-candidatos::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.lista-candidatos::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.lista-candidatos::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
