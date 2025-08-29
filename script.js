@@ -1,9 +1,10 @@
-// Configuração do Supabase
+// Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS
 const SUPABASE_URL = 'https://seu-projeto.supabase.co';
 const SUPABASE_ANON_KEY = 'sua-chave-anon-publica';
 
-// Inicializar o cliente Supabase
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inicializar o cliente Supabase CORRETAMENTE
+const { createClient } = window.supabase;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Sistema de notificação
 function showNotification(message, type = 'success') {
@@ -17,18 +18,47 @@ function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        z-index: 10000;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        transform: translateX(100%);
+        opacity: 0;
+    `;
+    
+    // Cores baseadas no tipo
+    if (type === 'success') {
+        notification.style.background = '#4CAF50';
+    } else if (type === 'error') {
+        notification.style.background = '#f44336';
+    } else if (type === 'warning') {
+        notification.style.background = '#ff9800';
+    } else if (type === 'info') {
+        notification.style.background = '#2196F3';
+    }
+    
     document.body.appendChild(notification);
     
     // Mostra a notificação
     setTimeout(() => {
-        notification.classList.add('show');
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
     }, 100);
     
     // Remove após 3 segundos
     setTimeout(() => {
-        notification.classList.remove('show');
+        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '0';
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentNode) {
+                notification.remove();
+            }
         }, 300);
     }, 3000);
 }
@@ -47,6 +77,10 @@ let timerInterval;
 let timerAtivo = false;
 const ADMIN_PASSWORD = "admin123";
 
+// Controle de sincronização
+let isSyncing = false;
+let syncQueue = [];
+
 // Inicialização
 async function inicializar() {
     carregarConfiguracao();
@@ -54,9 +88,12 @@ async function inicializar() {
     atualizarDisplay();
     atualizarInterfaceAdmin();
     aplicarTemaSalvo();
+    atualizarDisplayEleicao();
     
     // Verificar se há votos offline para sincronizar
-    setTimeout(sincronizarVotosOffline, 2000);
+    setTimeout(() => {
+        verificarVotosPendentes();
+    }, 2000);
 }
 
 // Timer de votação
@@ -89,13 +126,17 @@ function atualizarTimer() {
     const timerElement = document.getElementById('timer');
     const timerContainer = document.querySelector('.timer-container');
     
-    timerElement.textContent = tempoVotacao;
+    if (timerElement) {
+        timerElement.textContent = tempoVotacao;
+    }
     
-    timerContainer.classList.remove('warning', 'danger');
-    if (tempoVotacao <= 10) {
-        timerContainer.classList.add('danger');
-    } else if (tempoVotacao <= 20) {
-        timerContainer.classList.add('warning');
+    if (timerContainer) {
+        timerContainer.classList.remove('warning', 'danger');
+        if (tempoVotacao <= 10) {
+            timerContainer.classList.add('danger');
+        } else if (tempoVotacao <= 20) {
+            timerContainer.classList.add('warning');
+        }
     }
 }
 
@@ -226,6 +267,8 @@ function removerCandidato(numero) {
 
 function atualizarListaCandidatos() {
     const lista = document.getElementById('lista-candidatos');
+    if (!lista) return;
+    
     lista.innerHTML = '';
     
     Object.entries(configuracao.candidatos).forEach(([numero, candidato]) => {
@@ -257,8 +300,11 @@ function carregarConfiguracao() {
 }
 
 function atualizarDisplayEleicao() {
-    document.getElementById('titulo-eleicao-display').textContent = configuracao.titulo;
-    document.getElementById('cargo-display').textContent = configuracao.cargo;
+    const tituloDisplay = document.getElementById('titulo-eleicao-display');
+    const cargoDisplay = document.getElementById('cargo-display');
+    
+    if (tituloDisplay) tituloDisplay.textContent = configuracao.titulo;
+    if (cargoDisplay) cargoDisplay.textContent = configuracao.cargo;
 }
 
 // Funções de votação
@@ -289,10 +335,10 @@ function mostrarCandidato() {
     const nomeElemento = document.getElementById('nome-candidato-display');
     const partidoElemento = document.getElementById('partido-display');
     
-    if (candidato) {
+    if (candidato && nomeElemento && partidoElemento) {
         nomeElemento.textContent = candidato.nome;
         partidoElemento.textContent = candidato.partido;
-    } else {
+    } else if (nomeElemento && partidoElemento) {
         nomeElemento.textContent = 'VOTO NULO';
         partidoElemento.textContent = '';
     }
@@ -302,8 +348,11 @@ function branco() {
     if (!timerAtivo) iniciarTimer();
     
     votoAtual = 'BR';
-    document.getElementById('nome-candidato-display').textContent = 'VOTO EM BRANCO';
-    document.getElementById('partido-display').textContent = '';
+    const nomeElemento = document.getElementById('nome-candidato-display');
+    const partidoElemento = document.getElementById('partido-display');
+    
+    if (nomeElemento) nomeElemento.textContent = 'VOTO EM BRANCO';
+    if (partidoElemento) partidoElemento.textContent = '';
     atualizarDisplay();
 }
 
@@ -311,8 +360,11 @@ function corrige() {
     if (!timerAtivo) iniciarTimer();
     
     votoAtual = '';
-    document.getElementById('nome-candidato-display').textContent = 'NOME DO CANDIDATO';
-    document.getElementById('partido-display').textContent = 'PARTIDO/CHAPA';
+    const nomeElemento = document.getElementById('nome-candidato-display');
+    const partidoElemento = document.getElementById('partido-display');
+    
+    if (nomeElemento) nomeElemento.textContent = 'NOME DO CANDIDATO';
+    if (partidoElemento) partidoElemento.textContent = 'PARTIDO/CHAPA';
     atualizarDisplay();
 }
 
@@ -322,12 +374,16 @@ async function confirma() {
         return;
     }
     
-    await salvarVoto({
+    const votoData = {
         cargo: configuracao.cargo,
         numero: votoAtual,
         timestamp: new Date().toISOString(),
-        candidato: configuracao.candidatos[votoAtual] ? configuracao.candidatos[votoAtual].nome : (votoAtual === 'BR' ? 'BRANCO' : 'NULO')
-    });
+        candidato: configuracao.candidatos[votoAtual] ? 
+                  configuracao.candidatos[votoAtual].nome : 
+                  (votoAtual === 'BR' ? 'BRANCO' : 'NULO')
+    };
+    
+    await salvarVoto(votoData);
     
     showNotification('Voto confirmado com sucesso!');
     pararTimer();
@@ -346,105 +402,187 @@ async function salvarVoto(voto) {
         votos.push(voto);
         localStorage.setItem('votos', JSON.stringify(votos));
         
-        // Tentar salvar no Supabase
-        const { data, error } = await supabase
+        // Tentar salvar no Supabase (não bloqueante)
+        salvarVotoOnline(voto);
+        
+    } catch (e) {
+        console.error('Erro ao salvar voto:', e);
+        // Salva na fila de sincronização mesmo com erro
+        adicionarParaSincronizacao(voto);
+    }
+}
+
+// Salvar online de forma não bloqueante
+async function salvarVotoOnline(voto) {
+    try {
+        const { error } = await supabase
             .from('votos')
             .insert([
                 { 
                     cargo: voto.cargo, 
                     numero: voto.numero, 
-                    candidato: voto.candidato 
+                    candidato: voto.candidato,
+                    timestamp: voto.timestamp
                 }
             ]);
             
         if (error) {
             console.error('Erro ao salvar no Supabase:', error);
-            // Não mostra erro para o usuário para não interromper a votação
+            adicionarParaSincronizacao(voto);
         }
     } catch (e) {
-        console.error('Exceção ao salvar voto:', e);
+        console.error('Exceção ao salvar online:', e);
+        adicionarParaSincronizacao(voto);
     }
 }
 
-// Sincronizar votos offline com Supabase
+// Adicionar voto para sincronização posterior
+function adicionarParaSincronizacao(voto) {
+    let pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    pendentes.push(voto);
+    localStorage.setItem('votosPendentes', JSON.stringify(pendentes));
+}
+
+// Verificar votos pendentes
+function verificarVotosPendentes() {
+    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    if (pendentes.length > 0) {
+        showNotification(`${pendentes.length} votos pendentes para sincronizar`, 'info');
+    }
+}
+
+// Sincronizar votos offline com Supabase - VERSÃO CORRIGIDA
 async function sincronizarVotosOffline() {
-    const votos = JSON.parse(localStorage.getItem('votos')) || [];
+    if (isSyncing) {
+        showNotification('Sincronização já em andamento...', 'info');
+        return;
+    }
     
-    if (votos.length === 0) {
+    const votos = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    const votosLocal = JSON.parse(localStorage.getItem('votos')) || [];
+    
+    if (votos.length === 0 && votosLocal.length === 0) {
         showNotification('Nenhum voto offline para sincronizar.', 'info');
         return;
     }
     
-    showNotification(`Sincronizando ${votos.length} voto(s) offline...`, 'info');
+    isSyncing = true;
+    const syncButton = document.querySelector('.btn-sync');
+    const originalText = syncButton?.innerHTML;
     
     try {
-        for (const voto of votos) {
-            const { data, error } = await supabase
-                .from('votos')
-                .insert([
-                    { 
-                        cargo: voto.cargo, 
-                        numero: voto.numero, 
-                        candidato: voto.candidato 
-                    }
-                ]);
+        if (syncButton) {
+            syncButton.innerHTML = '⏳';
+            syncButton.disabled = true;
+        }
+        
+        showNotification(`Iniciando sincronização de ${votos.length + votosLocal.length} votos...`, 'info');
+        
+        let successCount = 0;
+        let errorCount = 0;
+        
+        // Sincronizar votos pendentes primeiro
+        for (let i = 0; i < votos.length; i++) {
+            if (!navigator.onLine) {
+                throw new Error('Conexão perdida durante a sincronização');
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('votos')
+                    .insert([votos[i]]);
                 
-            if (!error) {
-                // Remove o voto do localStorage após sincronizar com sucesso
-                const novosVotos = votos.filter(v => v.timestamp !== voto.timestamp);
-                localStorage.setItem('votos', JSON.stringify(novosVotos));
-            } else {
-                console.error('Erro ao sincronizar voto:', error);
-                break; // Para de tentar sincronizar se houver erro
+                if (!error) {
+                    successCount++;
+                    // Remove o voto sincronizado
+                    votos.splice(i, 1);
+                    i--; // Ajusta o índice após remoção
+                    localStorage.setItem('votosPendentes', JSON.stringify(votos));
+                } else {
+                    errorCount++;
+                    console.error('Erro ao sincronizar voto:', error);
+                }
+                
+                // Pequena pausa para não sobrecarregar
+                await new Promise(resolve => setTimeout(resolve, 50));
+                
+            } catch (error) {
+                errorCount++;
+                console.error('Erro no voto individual:', error);
             }
         }
         
-        showNotification('Votos offline sincronizados com sucesso!');
-    } catch (e) {
-        console.error('Erro ao sincronizar votos offline:', e);
-        showNotification('Erro ao sincronizar votos. Tente novamente.', 'error');
+        // Sincronizar votos locais (backup)
+        for (let i = 0; i < votosLocal.length; i++) {
+            if (!navigator.onLine) {
+                throw new Error('Conexão perdida durante a sincronização');
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('votos')
+                    .insert([votosLocal[i]]);
+                
+                if (!error) {
+                    successCount++;
+                    // Remove o voto sincronizado
+                    votosLocal.splice(i, 1);
+                    i--;
+                    localStorage.setItem('votos', JSON.stringify(votosLocal));
+                } else {
+                    errorCount++;
+                    console.error('Erro ao sincronizar voto local:', error);
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 50));
+                
+            } catch (error) {
+                errorCount++;
+                console.error('Erro no voto local individual:', error);
+            }
+        }
+        
+        if (successCount > 0) {
+            showNotification(`Sincronização concluída! ${successCount} votos sincronizados, ${errorCount} erros.`, 'success');
+        } else if (errorCount > 0) {
+            showNotification('Falha na sincronização. Tente novamente.', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Erro geral na sincronização:', error);
+        showNotification('Erro na sincronização: ' + error.message, 'error');
+    } finally {
+        isSyncing = false;
+        if (syncButton) {
+            syncButton.innerHTML = originalText;
+            syncButton.disabled = false;
+        }
     }
 }
 
 // Gerenciamento de dados
 async function exportarResultados() {
     const votos = JSON.parse(localStorage.getItem('votos')) || [];
+    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    const todosVotos = [...votos, ...pendentes];
     
-    if (votos.length === 0) {
+    if (todosVotos.length === 0) {
         showNotification('Nenhum voto registrado ainda!', 'warning');
         return;
     }
     
-    const resultados = calcularResultados(votos);
+    const resultados = calcularResultados(todosVotos);
     const dados = {
         configuracao: configuracao,
-        votos: votos,
+        votos: todosVotos,
         resultados: resultados,
-        totalVotos: votos.length,
+        totalVotos: todosVotos.length,
         exportadoEm: new Date().toISOString()
     };
     
-    // Salvar no Supabase
-    try {
-        const { data, error } = await supabase
-            .from('resultados_exportados')
-            .insert([
-                { dados: dados }
-            ]);
-            
-        if (error) {
-            console.error('Erro ao salvar resultados no Supabase:', error);
-            showNotification('Erro ao exportar resultados!', 'error');
-        } else {
-            showNotification(`Resultados exportados! Total: ${votos.length} votos`);
-            
-            // Também fazer download do JSON
-            fazerDownload(JSON.stringify(dados, null, 2), 'resultados-eleicao.json');
-        }
-    } catch (e) {
-        console.error('Exceção ao exportar resultados:', e);
-        showNotification('Erro ao exportar resultados!', 'error');
-    }
+    // Fazer download do JSON
+    fazerDownload(JSON.stringify(dados, null, 2), 'resultados-eleicao.json');
+    showNotification(`Resultados exportados! Total: ${todosVotos.length} votos`);
 }
 
 function calcularResultados(votos) {
@@ -479,18 +617,21 @@ function fazerDownload(dados, filename) {
 
 function visualizarResultados() {
     const votos = JSON.parse(localStorage.getItem('votos')) || [];
+    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    const todosVotos = [...votos, ...pendentes];
     
-    if (votos.length === 0) {
+    if (todosVotos.length === 0) {
         showNotification('Nenhum voto registrado ainda!', 'warning');
         return;
     }
     
-    const resultados = calcularResultados(votos);
+    const resultados = calcularResultados(todosVotos);
     let mensagem = `RESULTADOS - ${configuracao.titulo}\n\n`;
-    mensagem += `Total de votos: ${votos.length}\n\n`;
+    mensagem += `Total de votos: ${todosVotos.length}\n`;
+    mensagem += `(${votos.length} confirmados, ${pendentes.length} pendentes)\n\n`;
     
     resultados.forEach((resultado, index) => {
-        const percentual = ((resultado.votos / votos.length) * 100).toFixed(1);
+        const percentual = ((resultado.votos / todosVotos.length) * 100).toFixed(1);
         mensagem += `${index + 1}. ${resultado.candidato}: ${resultado.votos} votos (${percentual}%)\n`;
     });
     
@@ -500,6 +641,7 @@ function visualizarResultados() {
 function limparVotos() {
     if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os votos registrados. Tem certeza?')) {
         localStorage.removeItem('votos');
+        localStorage.removeItem('votosPendentes');
         showNotification('Todos os votos foram apagados!', 'warning');
     }
 }
@@ -508,6 +650,7 @@ function limparTudo() {
     if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os dados (candidatos, votos e configuração). Tem certeza?')) {
         localStorage.removeItem('configuracaoEleicao');
         localStorage.removeItem('votos');
+        localStorage.removeItem('votosPendentes');
         configuracao = {
             titulo: 'Eleição Universal',
             cargo: 'Representante',
@@ -546,3 +689,13 @@ document.addEventListener('keydown', function(event) {
         branco();
     }
 });
+
+// Verificar conexão periodicamente
+setInterval(() => {
+    if (navigator.onLine) {
+        const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+        if (pendentes.length > 0 && !isSyncing) {
+            sincronizarVotosOffline();
+        }
+    }
+}, 30000); // Verifica a cada 30 segundos
