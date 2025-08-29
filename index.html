@@ -3,70 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urna Eletrônica - Tela Inicial</title>
+    <title>Urna Eletrônica Universal</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="light-theme">
     <div class="container">
-        <div class="header">
-            <h1>🗳️ URNA ELETRÔNICA</h1>
-            <p>Sistema de Votação Segura</p>
-        </div>
-        
-        <div class="content">
-            <h2>Votação para Representante de Turma</h2>
-            <p>Você tem 30 segundos para realizar seu voto</p>
+        <!-- Header Centralizado -->
+        <header class="header">
+            <div>
+                <h1>🗳️ URNA ELETRÔNICA</h1>
+                <p id="titulo-eleicao-display">Sistema de Votação Universal</p>
+            </div>
             
-            <div class="timer-container">
-                <div class="timer-circle">
-                    <div class="timer" id="countdown">30</div>
+            <div class="header-controls">
+                <div class="timer-container">
+                    ⏰ <span id="timer">30</span>s
                 </div>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema Escuro</button>
+                <button onclick="toggleAdmin()" class="btn-admin" id="admin-btn">
+                    🔧 Modo Admin
+                </button>
             </div>
-            
-            <div class="warning">
-                <h3>⚠️ ATENÇÃO</h3>
-                <p>Se o tempo se esgotar, seu voto será automaticamente considerado <strong>NULO</strong>.</p>
-                <p>Certifique-se de confirmar seu voto antes do término do tempo.</p>
-            </div>
-            
-            <button class="btn-start" id="startBtn">INICIAR VOTAÇÃO</button>
-            
-            <div class="urna-screen" id="urnaScreen">
-                <div class="display">
-                    <h3>SEU VOTO PARA</h3>
-                    <h2>REPRESENTANTE DE TURMA</h2>
-                    
-                    <div class="numbers">
-                        <div class="number" id="num1">_</div>
-                        <div class="number" id="num2">_</div>
-                    </div>
-                    
-                    <div class="candidate-info">
-                        <div class="candidate-name" id="candidateName">NOME DO CANDIDATO</div>
-                        <div class="candidate-party" id="candidateParty">PARTIDO/CHAPA</div>
-                    </div>
+        </header>
+
+        <!-- Painel Principal -->
+        <main class="main-content">
+            <!-- Modo Admin -->
+            <div id="admin-panel" class="admin-panel">
+                <div class="admin-header">
+                    <h2>PAINEL ADMINISTRATIVO</h2>
+                    <button onclick="toggleAdmin()" class="btn-fechar">✕</button>
                 </div>
                 
-                <div class="keyboard">
-                    <button class="key" data-key="1">1</button>
-                    <button class="key" data-key="2">2</button>
-                    <button class="key" data-key="3">3</button>
-                    <button class="key" data-key="4">4</button>
-                    <button class="key" data-key="5">5</button>
-                    <button class="key" data-key="6">6</button>
-                    <button class="key" data-key="7">7</button>
-                    <button class="key" data-key="8">8</button>
-                    <button class="key" data-key="9">9</button>
-                    <button class="key" data-key="0">0</button>
-                    <button class="key correct" id="correctBtn">CORRIGE</button>
-                    <button class="key confirm" id="confirmBtn">CONFIRMA</button>
+                <div class="admin-grid">
+                    <!-- Configuração da Eleição -->
+                    <div class="admin-card">
+                        <h3>⚙️ CONFIGURAÇÃO</h3>
+                        <input type="text" id="titulo-eleicao" placeholder="Título da Eleição" class="input-admin">
+                        <input type="text" id="cargo-eleicao" placeholder="Cargo em disputa" class="input-admin">
+                    </div>
+
+                    <!-- Cadastro de Candidatos -->
+                    <div class="admin-card">
+                        <h3>👥 CADASTRAR CANDIDATOS</h3>
+                        <div class="candidato-form">
+                            <input type="number" id="numero-candidato" placeholder="Número (2 dígitos)" 
+                                   class="input-admin" min="10" max="99">
+                            <input type="text" id="nome-candidato" placeholder="Nome completo" class="input-admin">
+                            <input type="text" id="partido-candidato" placeholder="Partido/Chapa" class="input-admin">
+                            <button onclick="adicionarCandidato()" class="btn-add">➕ Adicionar</button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Candidatos -->
+                    <div class="admin-card full-width">
+                        <h3>📋 CANDIDATOS CADASTRADOS</h3>
+                        <div id="lista-candidatos" class="lista-candidatos">
+                            <!-- Candidatos serão listados aqui -->
+                        </div>
+                    </div>
+
+                    <!-- Controles Admin -->
+                    <div class="admin-card full-width">
+                        <h3>⚡ CONTROLES</h3>
+                        <div class="controles-admin">
+                            <button onclick="salvarConfiguracao()" class="btn-save">💾 Salvar Tudo</button>
+                            <button onclick="limparTudo()" class="btn-clear">🗑️ Limpar Tudo</button>
+                            <button onclick="exportarResultados()" class="btn-export">📊 Exportar Resultados</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="footer">
-            <p>Sistema de votação eletrônica - Desenvolvido para o TCC</p>
-        </div>
+
+            <!-- Modo Votação -->
+            <div id="voting-panel" class="voting-panel">
+                <div class="urna-container">
+                    <!-- Tela da Urna -->
+                    <div class="tela">
+                        <div class="tela-content">
+                            <div class="tela-header">
+                                <div class="titulo">SEU VOTO PARA</div>
+                                <div class="cargo" id="cargo-display">REPRESENTANTE</div>
+                            </div>
+                            
+                            <div class="numeros-display">
+                                <span id="numero1">_</span>
+                                <span id="numero2">_</span>
+                            </div>
+                            
+                            <div class="candidato-info">
+                                <div id="nome-candidato-display" class="nome-candidato">NOME DO CANDIDATO</div>
+                                <div id="partido-display" class="partido-candidato">PARTIDO/CHAPA</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teclado -->
+                    <div class="teclado">
+                        <div class="teclado-grid">
+                            <button onclick="pressionarTecla(1)" class="tecla">1</button>
+                            <button onclick="pressionarTecla(2)" class="tecla">2</button>
+                            <button onclick="pressionarTecla(3)" class="tecla">3</button>
+                            <button onclick="pressionarTecla(4)" class="tecla">4</button>
+                            <button onclick="pressionarTecla(5)" class="tecla">5</button>
+                            <button onclick="pressionarTecla(6)" class="tecla">6</button>
+                            <button onclick="pressionarTecla(7)" class="tecla">7</button>
+                            <button onclick="pressionarTecla(8)" class="tecla">8</button>
+                            <button onclick="pressionarTecla(9)" class="tecla">9</button>
+                            <button onclick="pressionarTecla(0)" class="tecla">0</button>
+                            <button onclick="branco()" class="tecla branco">BRANCO</button>
+                            <button onclick="corrige()" class="tecla corrige">CORRIGE</button>
+                            <button onclick="confirma()" class="tecla confirma">CONFIRMA</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles de Votação -->
+                <div class="controles-votacao">
+                    <button onclick="exportarResultados()" class="btn-control">
+                        📊 Exportar Resultados
+                    </button>
+                    <button onclick="visualizarResultados()" class="btn-control">
+                        📈 Ver Resultados
+                    </button>
+                    <button onclick="limparVotos()" class="btn-control danger">
+                        🗑️ Limpar Votos
+                    </button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="script.js"></script>
