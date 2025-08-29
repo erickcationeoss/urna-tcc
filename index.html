@@ -8,7 +8,7 @@
 </head>
 <body class="light-theme">
     <div class="container">
-        <!-- Header Centralizado -->
+        <!-- Header -->
         <header class="header">
             <div>
                 <h1>🗳️ URNA ELETRÔNICA</h1>
@@ -19,9 +19,9 @@
                 <div class="timer-container">
                     ⏰ <span id="timer">30</span>s
                 </div>
-                <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema Escuro</button>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
                 <button onclick="toggleAdmin()" class="btn-admin" id="admin-btn">
-                    🔧 Modo Admin
+                    🔧
                 </button>
             </div>
         </header>
@@ -67,9 +67,9 @@
                     <div class="admin-card full-width">
                         <h3>⚡ CONTROLES</h3>
                         <div class="controles-admin">
-                            <button onclick="salvarConfiguracao()" class="btn-save">💾 Salvar Tudo</button>
-                            <button onclick="limparTudo()" class="btn-clear">🗑️ Limpar Tudo</button>
-                            <button onclick="exportarResultados()" class="btn-export">📊 Exportar Resultados</button>
+                            <button onclick="salvarConfiguracao()" class="btn-save">💾 Salvar</button>
+                            <button onclick="limparTudo()" class="btn-clear">🗑️ Limpar</button>
+                            <button onclick="exportarResultados()" class="btn-export">📊 Exportar</button>
                         </div>
                     </div>
                 </div>
@@ -121,13 +121,13 @@
                 <!-- Controles de Votação -->
                 <div class="controles-votacao">
                     <button onclick="exportarResultados()" class="btn-control">
-                        📊 Exportar Resultados
+                        📊 Exportar
                     </button>
                     <button onclick="visualizarResultados()" class="btn-control">
-                        📈 Ver Resultados
+                        📈 Resultados
                     </button>
                     <button onclick="limparVotos()" class="btn-control danger">
-                        🗑️ Limpar Votos
+                        🗑️ Limpar
                     </button>
                 </div>
             </div>
