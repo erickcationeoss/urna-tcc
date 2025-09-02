@@ -1041,3 +1041,213 @@ function visualizarResultados() {
     // Mostrar em modal ao invés de alert
     mostrarResultadosModal(resultados, todosVotos.length);
 }
+// Adicione estas funções após a inicialização do Supabase
+
+// Carregar candidatos do Supabase
+async function carregarCandidatos() {
+    try {
+        const { data, error } = await supabase
+            .from('candidatos')
+            .select('*')
+            .order('numero', { ascending: true });
+            
+        if (error) {
+            console.error('Erro ao carregar candidatos:', error);
+            // Fallback para candidatos locais
+            const saved = localStorage.getItem('candidatos');
+            if (saved) {
+                configuracao.candidatos = JSON.parse(saved);
+            }
+            return;
+        }
+        
+        if (data && data.length > 0) {
+            // Converter array de candidatos para objeto
+            configuracao.candidatos = {};
+            data.forEach(candidato => {
+                configuracao.candidatos[candidato.numero] = {
+                    nome: candidato.nome,
+                    partido: candidato.partido
+                };
+            });
+            
+            // Também salvar localmente como backup
+            localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
+        } else {
+            // Carregar do localStorage se não houver candidatos no Supabase
+            const saved = localStorage.getItem('candidatos');
+            if (saved) {
+                configuracao.candidatos = JSON.parse(saved);
+            }
+        }
+    } catch (e) {
+        console.error('Erro ao carregar candidatos:', e);
+        const saved = localStorage.getItem('candidatos');
+        if (saved) {
+            configuracao.candidatos = JSON.parse(saved);
+        }
+    }
+}
+
+// Salvar candidato no Supabase
+async function salvarCandidatoNoSupabase(numero, nome, partido) {
+    try {
+        const { error } = await supabase
+            .from('candidatos')
+            .insert([
+                { 
+                    numero: numero,
+                    nome: nome.toUpperCase(),
+                    partido: partido.toUpperCase()
+                }
+            ]);
+            
+        if (error) {
+            console.error('Erro ao salvar candidato no Supabase:', error);
+            // Salvar apenas localmente em caso de erro
+            return false;
+        }
+        
+        return true;
+    } catch (e) {
+        console.error('Exceção ao salvar candidato:', e);
+        return false;
+    }
+}
+
+// Remover candidato do Supabase
+async function removerCandidatoDoSupabase(numero) {
+    try {
+        const { error } = await supabase
+            .from('candidatos')
+            .delete()
+            .eq('numero', numero);
+            
+        if (error) {
+            console.error('Erro ao remover candidato do Supabase:', error);
+            return false;
+        }
+        
+        return true;
+    } catch (e) {
+        console.error('Exceção ao remover candidato:', e);
+        return false;
+    }
+}
+
+// Modifique a função adicionarCandidato para salvar no Supabase
+async function adicionarCandidato() {
+    const numero = document.getElementById('numero-candidato').value.padStart(2, '0');
+    const nome = document.getElementById('nome-candidato').value.trim();
+    const partido = document.getElementById('partido-candidato').value.trim();
+    
+    if (!numero || !nome || !partido) {
+        showNotification('Preencha todos os campos!', 'error');
+        return;
+    }
+    
+    if (numero.length !== 2) {
+        showNotification('O número deve ter 2 dígitos!', 'error');
+        return;
+    }
+    
+    if (configuracao.candidatos[numero]) {
+        showNotification('Já existe um candidato com este número!', 'error');
+        return;
+    }
+    
+    // Tentar salvar no Supabase primeiro
+    const sucessoOnline = await salvarCandidatoNoSupabase(numero, nome, partido);
+    
+    // Salvar localmente de qualquer forma
+    configuracao.candidatos[numero] = {
+        nome: nome.toUpperCase(),
+        partido: partido.toUpperCase()
+    };
+    
+    // Salvar backup local
+    localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
+    
+    document.getElementById('numero-candidato').value = '';
+    document.getElementById('nome-candidato').value = '';
+    document.getElementById('partido-candidato').value = '';
+    
+    atualizarListaCandidatos();
+    salvarConfiguracao();
+    
+    if (sucessoOnline) {
+        showNotification('Candidato adicionado com sucesso!');
+    } else {
+        showNotification('Candidato salvo localmente (sem conexão)', 'warning');
+    }
+}
+
+// Modifique a função removerCandidato para remover do Supabase
+async function removerCandidato(numero) {
+    if (confirm(`Tem certeza que deseja remover o candidato ${numero}?`)) {
+        // Tentar remover do Supabase
+        await removerCandidatoDoSupabase(numero);
+        
+        // Remover localmente de qualquer forma
+        delete configuracao.candidatos[numero];
+        
+        // Atualizar backup local
+        localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
+        
+        atualizarListaCandidatos();
+        salvarConfiguracao();
+        showNotification('Candidato removido com sucesso!');
+    }
+}
+
+// Adicione esta função para sincronizar candidatos locais com o Supabase
+async function sincronizarCandidatos() {
+    const candidatosLocais = JSON.parse(localStorage.getItem('candidatos') || '{}');
+    
+    if (Object.keys(candidatosLocais).length === 0) return;
+    
+    try {
+        for (const [numero, candidato] of Object.entries(candidatosLocais)) {
+            // Verificar se o candidato já existe no Supabase
+            const { data, error } = await supabase
+                .from('candidatos')
+                .select('numero')
+                .eq('numero', numero)
+                .single();
+                
+            if (error || !data) {
+                // Candidato não existe, vamos adicionar
+                await salvarCandidatoNoSupabase(numero, candidato.nome, candidato.partido);
+            }
+        }
+        
+        // Limpar candidatos locais após sincronização bem-sucedida
+        localStorage.removeItem('candidatos');
+        showNotification('Candidatos sincronizados com o Supabase!', 'success');
+    } catch (e) {
+        console.error('Erro ao sincronizar candidatos:', e);
+    }
+}
+
+// Modifique a função inicializar para carregar candidatos corretamente
+async function inicializar() {
+    carregarConfiguracao();
+    await carregarCandidatos(); // Agora é async
+    atualizarDisplay();
+    atualizarInterfaceAdmin();
+    aplicarTemaSalvo();
+    atualizarDisplayEleicao();
+    
+    // Verificar se há votos offline para sincronizar
+    setTimeout(() => {
+        verificarVotosPendentes();
+    }, 2000);
+    
+    // Verificar parâmetros de sessão na URL
+    verificarParametroSessao();
+    
+    // Sincronizar candidatos locais se houver conexão
+    if (navigator.onLine) {
+        setTimeout(sincronizarCandidatos, 3000);
+    }
+}
