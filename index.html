@@ -14,6 +14,7 @@
             <div class="header-controls">
                 <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
                 <button class="admin-toggle" onclick="toggleAdmin()">🔧 Admin</button>
+                <button class="results-toggle" onclick="visualizarResultados()">📊 Resultados</button>
             </div>
         </header>
 
@@ -77,63 +78,69 @@
         <div id="admin-panel" style="display: none;">
             <h2>Painel de Administração</h2>
             
-            <div class="admin-section">
-                <h3>Configuração da Eleição</h3>
-                <div class="form-group">
-                    <label for="titulo-eleicao">Título da Eleição:</label>
-                    <input type="text" id="titulo-eleicao" placeholder="Ex: Eleição para Representante de Turma">
+            <div class="admin-grid">
+                <div class="admin-section">
+                    <h3>Configuração da Eleição</h3>
+                    <div class="form-group">
+                        <label for="titulo-eleicao">Título da Eleição:</label>
+                        <input type="text" id="titulo-eleicao" placeholder="Ex: Eleição para Representante de Turma">
+                    </div>
+                    <div class="form-group">
+                        <label for="cargo-eleicao">Cargo em Disputa:</label>
+                        <input type="text" id="cargo-eleicao" placeholder="Ex: Representante de Turma">
+                    </div>
+                    <button onclick="salvarConfiguracao()" class="btn-save">Salvar Configuração</button>
                 </div>
-                <div class="form-group">
-                    <label for="cargo-eleicao">Cargo em Disputa:</label>
-                    <input type="text" id="cargo-eleicao" placeholder="Ex: Representante de Turma">
-                </div>
-                <button onclick="salvarConfiguracao()" class="btn-save">Salvar Configuração</button>
-            </div>
 
-            <div class="admin-section">
-                <h3>Gerenciar Candidatos</h3>
-                <div class="form-group">
-                    <label for="numero-candidato">Número (2 dígitos):</label>
-                    <input type="number" id="numero-candidato" min="0" max="99" placeholder="00">
-                </div>
-                <div class="form-group">
-                    <label for="nome-candidato">Nome do Candidato:</label>
-                    <input type="text" id="nome-candidato" placeholder="Nome completo">
-                </div>
-                <div class="form-group">
-                    <label for="partido-candidato">Partido/Chapa:</label>
-                    <input type="text" id="partido-candidato" placeholder="Partido ou Chapa">
-                </div>
-                <button onclick="adicionarCandidato()" class="btn-add">Adicionar Candidato</button>
-                
-                <div class="candidates-list">
-                    <h4>Candidatos Cadastrados</h4>
-                    <div id="lista-candidatos" class="candidates-container"></div>
+                <div class="admin-section">
+                    <h3>Gerenciar Candidatos</h3>
+                    <div class="form-group">
+                        <label for="numero-candidato">Número (2 dígitos):</label>
+                        <input type="number" id="numero-candidato" min="0" max="99" placeholder="00">
+                    </div>
+                    <div class="form-group">
+                        <label for="nome-candidato">Nome do Candidato:</label>
+                        <input type="text" id="nome-candidato" placeholder="Nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="partido-candidato">Partido/Chapa:</label>
+                        <input type="text" id="partido-candidato" placeholder="Partido ou Chapa">
+                    </div>
+                    <button onclick="adicionarCandidato()" class="btn-add">Adicionar Candidato</button>
                 </div>
             </div>
-
-            <div class="admin-section">
-                <h3>Gerenciamento de Dados</h3>
-                <div class="action-buttons">
-                    <button onclick="visualizarResultados()" class="btn-results">Visualizar Resultados</button>
-                    <button onclick="exportarResultados()" class="btn-export">Exportar Resultados</button>
-                    <button onclick="sincronizarVotosOffline()" class="btn-sync">Sincronizar Votos</button>
-                    <button onclick="limparVotos()" class="btn-clear">Limpar Votos</button>
-                    <button onclick="limparTudo()" class="btn-clear-all">Limpar Tudo</button>
-                </div>
+            
+            <div class="admin-section full-width">
+                <h4>Candidatos Cadastrados</h4>
+                <div id="lista-candidatos" class="candidates-container"></div>
             </div>
 
-            <div class="admin-section">
-                <h3>Compartilhamento de Votos</h3>
-                <div class="sharing-controls">
-                    <button onclick="iniciarCompartilhamento()" class="btn-share">Iniciar Compartilhamento</button>
-                    <button onclick="pararCompartilhamento()" class="btn-stop-share">Parar Compartilhamento</button>
+            <div class="admin-grid">
+                <div class="admin-section">
+                    <h3>Gerenciamento de Dados</h3>
+                    <div class="action-buttons">
+                        <button onclick="visualizarResultados()" class="btn-results">Visualizar Resultados</button>
+                        <button onclick="exportarResultados()" class="btn-export">Exportar Resultados</button>
+                        <button onclick="sincronizarVotosOffline()" class="btn-sync">Sincronizar Votos</button>
+                        <button onclick="limparVotos()" class="btn-clear">Limpar Votos</button>
+                        <button onclick="limparTudo()" class="btn-clear-all">Limpar Tudo</button>
+                    </div>
                 </div>
-                
-                <div id="compartilhamento-container" style="display: none;">
-                    <p>Compartilhe este link para receber votos:</p>
-                    <input type="text" id="link-compartilhamento" readonly>
-                    <button onclick="copiarLink()" class="btn-copy">Copiar Link</button>
+
+                <div class="admin-section">
+                    <h3>Compartilhamento de Votos</h3>
+                    <div class="sharing-controls">
+                        <button onclick="iniciarCompartilhamento()" class="btn-share">Iniciar Compartilhamento</button>
+                        <button onclick="pararCompartilhamento()" class="btn-stop-share">Parar Compartilhamento</button>
+                    </div>
+                    
+                    <div id="compartilhamento-container" style="display: none;">
+                        <p>Compartilhe este link para receber votos:</p>
+                        <div class="link-container">
+                            <input type="text" id="link-compartilhamento" readonly>
+                            <button onclick="copiarLink()" class="btn-copy">Copiar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

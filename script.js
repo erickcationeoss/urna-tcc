@@ -984,3 +984,60 @@ setInterval(() => {
         }
     }
 }, 30000); // Verifica a cada 30 segundos
+// Modal para resultados
+function mostrarResultadosModal(resultados, totalVotos) {
+    // Criar modal
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resultados da Eleição</h2>
+                <button class="close-modal" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Total de votos:</strong> ${totalVotos}</p>
+                <div class="results-list">
+                    ${resultados.map((resultado, index) => `
+                        <div class="result-item ${index === 0 ? 'result-winner' : ''}">
+                            <div>
+                                <strong>${resultado.numero} - ${resultado.candidato}</strong>
+                            </div>
+                            <div>
+                                ${resultado.votos} votos (${((resultado.votos / totalVotos) * 100).toFixed(1)}%)
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Fechar modal ao clicar fora
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+// Modificar a função visualizarResultados
+function visualizarResultados() {
+    const votos = JSON.parse(localStorage.getItem('votos')) || [];
+    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    const todosVotos = [...votos, ...pendentes];
+    
+    if (todosVotos.length === 0) {
+        showNotification('Nenhum voto registrado ainda!', 'warning');
+        return;
+    }
+    
+    const resultados = calcularResultados(todosVotos);
+    
+    // Mostrar em modal ao invés de alert
+    mostrarResultadosModal(resultados, todosVotos.length);
+}
