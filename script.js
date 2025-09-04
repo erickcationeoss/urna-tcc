@@ -1,68 +1,15 @@
-// Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS REAIS
-const SUPABASE_URL = 'https://seu-projeto.supabase.co';
-const SUPABASE_ANON_KEY = 'sua-chave-anon-aqui';
+// ==============================================
+// CONFIGURAÇÃO DO SUPABASE
+// ==============================================
+const SUPABASE_URL = 'https://xvxrxzjunbeuajpzazhl.supabase.co'; // SUBSTITUA pela sua URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2eHJ4emp1bmJldWFqcHphemhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NzU0MzYsImV4cCI6MjA3MjA1MTQzNn0.ckHqVnUgieW6xIEm9k0XxtD4B9D_qnPcFs2G-FuUmiU'; // SUBSTITUA pela sua chave
 
 // Inicializar o cliente Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Sistema de notificação
-function showNotification(message, type = 'success') {
-    // Remove notificação anterior se existir
-    const existing = document.querySelector('.notification');
-    if (existing) {
-        existing.remove();
-    }
-    
-    // Cria nova notificação
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        color: white;
-        z-index: 10000;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        transform: translateX(100%);
-        opacity: 0;
-    `;
-    
-    // Cores baseadas no tipo
-    if (type === 'success') {
-        notification.style.background = '#4CAF50';
-    } else if (type === 'error') {
-        notification.style.background = '#f44336';
-    } else if (type === 'warning') {
-        notification.style.background = '#ff9800';
-    } else if (type === 'info') {
-        notification.style.background = '#2196F3';
-    }
-    
-    document.body.appendChild(notification);
-    
-    // Mostra a notificação
-    setTimeout(() => {
-        notification.style.transform = 'translateX(0)';
-        notification.style.opacity = '1';
-    }, 100);
-    
-    // Remove após 3 segundos
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        notification.style.opacity = '0';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Configuração da eleição
+// ==============================================
+// CONFIGURAÇÃO DA ELEIÇÃO
+// ==============================================
 let configuracao = {
     titulo: 'Eleição Universal',
     cargo: 'Representante',
@@ -76,223 +23,149 @@ let timerInterval;
 let timerAtivo = false;
 const ADMIN_PASSWORD = "admin123";
 
-// Controle de sincronização
+// Controles de sincronização
 let isSyncing = false;
-
-// SISTEMA DE COMPARTILHAMENTO DE VOTOS
 let sessaoCompartilhamento = null;
 let isReceiving = false;
 
-// Gerar ID único para sessão
-function gerarIdSessao() {
-    return 'sessao_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-}
-
-// Iniciar sessão de compartilhamento
-function iniciarCompartilhamento() {
-    if (!navigator.onLine) {
-        showNotification('É necessário estar online para compartilhar votos', 'error');
-        return;
-    }
+// ==============================================
+// SISTEMA DE NOTIFICAÇÃO
+// ==============================================
+function showNotification(message, type = 'success') {
+    // Remove notificação anterior se existir
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
     
-    sessaoCompartilhamento = gerarIdSessao();
+    // Cria nova notificação
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; padding: 15px 20px;
+        border-radius: 5px; color: white; z-index: 10000; font-weight: bold;
+        transition: all 0.3s ease; transform: translateX(100%); opacity: 0;
+        background: ${type === 'success' ? '#4CAF50' : 
+                   type === 'error' ? '#f44336' : 
+                   type === 'warning' ? '#ff9800' : '#2196F3'};
+    `;
     
-    // Salvar sessão no localStorage (já que o Supabase pode estar com problemas)
-    const sessoes = JSON.parse(localStorage.getItem('sessoes_compartilhamento')) || {};
-    sessoes[sessaoCompartilhamento] = {
-        id: sessaoCompartilhamento,
-        criador: true,
-        ativa: true,
-        data_criacao: new Date().toISOString()
-    };
-    localStorage.setItem('sessoes_compartilhamento', JSON.stringify(sessoes));
+    document.body.appendChild(notification);
     
-    // Gerar link de compartilhamento
-    const link = `${window.location.origin}${window.location.pathname}?sessao=${sessaoCompartilhamento}`;
-    
-    // Mostrar link para compartilhamento
-    const linkInput = document.getElementById('link-compartilhamento');
-    if (linkInput) {
-        linkInput.value = link;
-        document.getElementById('compartilhamento-container').style.display = 'block';
-    }
-    
-    showNotification('Sessão de compartilhamento criada! Compartilhe o link.', 'success');
-}
-
-// Parar compartilhamento
-function pararCompartilhamento() {
-    if (!sessaoCompartilhamento) return;
-    
-    // Marcar sessão como inativa no localStorage
-    const sessoes = JSON.parse(localStorage.getItem('sessoes_compartilhamento')) || {};
-    if (sessoes[sessaoCompartilhamento]) {
-        sessoes[sessaoCompartilhamento].ativa = false;
-        localStorage.setItem('sessoes_compartilhamento', JSON.stringify(sessoes));
-    }
-    
-    sessaoCompartilhamento = null;
-    isReceiving = false;
-    
-    document.getElementById('compartilhamento-container').style.display = 'none';
-    showNotification('Compartilhamento encerrado', 'info');
-}
-
-// Copiar link para área de transferência
-function copiarLink() {
-    const linkInput = document.getElementById('link-compartilhamento');
-    if (linkInput) {
-        linkInput.select();
-        document.execCommand('copy');
-        showNotification('Link copiado para a área de transferência!', 'success');
-    }
-}
-
-// Participar de uma sessão existente
-function participarSessao(sessaoId) {
-    if (!navigator.onLine) {
-        showNotification('É necessário estar online para participar de sessão', 'error');
-        return;
-    }
-    
-    // Verificar se a sessão existe no localStorage
-    const sessoes = JSON.parse(localStorage.getItem('sessoes_compartilhamento')) || {};
-    if (!sessoes[sessaoId] || !sessoes[sessaoId].ativa) {
-        showNotification('Sessão não encontrada ou inativa', 'error');
-        return;
-    }
-    
-    sessaoCompartilhamento = sessaoId;
-    isReceiving = true;
-    
-    // Registrar participação na sessão (localStorage)
-    const participantes = JSON.parse(localStorage.getItem('participantes_sessao')) || {};
-    const participanteId = gerarIdSessao().substr(0, 8);
-    participantes[participanteId] = {
-        sessao_id: sessaoId,
-        participante_id: participanteId,
-        data_ingresso: new Date().toISOString()
-    };
-    localStorage.setItem('participantes_sessao', JSON.stringify(participantes));
-    
-    showNotification('Conectado à sessão de compartilhamento!', 'success');
-    
-    // Esconder UI de convite se estiver visível
-    const conviteContainer = document.getElementById('convite-container');
-    if (conviteContainer) {
-        conviteContainer.style.display = 'none';
-    }
-}
-
-// Verificar se há parâmetro de sessão na URL
-function verificarParametroSessao() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessaoParam = urlParams.get('sessao');
-    
-    if (sessaoParam) {
-        // Mostrar UI de convite para participar
-        const conviteContainer = document.getElementById('convite-container');
-        if (conviteContainer) {
-            conviteContainer.style.display = 'block';
-            document.getElementById('sessao-id').textContent = sessaoParam;
-            
-            // Adicionar evento ao botão de participar
-            document.getElementById('btn-participar-sessao').onclick = function() {
-                participarSessao(sessaoParam);
-            };
-        }
-    }
-}
-
-// Compartilhar voto com a sessão
-async function compartilharVoto(votoData) {
-    if (!sessaoCompartilhamento || !navigator.onLine) return;
-    
-    try {
-        // Salvar no localStorage para compartilhamento
-        const votosCompartilhados = JSON.parse(localStorage.getItem('votos_compartilhados')) || [];
-        votoData.sessao_id = sessaoCompartilhamento;
-        votosCompartilhados.push(votoData);
-        localStorage.setItem('votos_compartilhados', JSON.stringify(votosCompartilhados));
-        
-        showNotification('Voto compartilhado na sessão!', 'success');
-    } catch (e) {
-        console.error('Exceção ao compartilhar voto:', e);
-    }
-}
-
-// Verificar votos recebidos da sessão
-function verificarVotosRecebidos() {
-    if (!sessaoCompartilhamento) return;
-    
-    // Verificar votos compartilhados no localStorage periodicamente
-    setInterval(() => {
-        if (!sessaoCompartilhamento) return;
-        
-        const votosCompartilhados = JSON.parse(localStorage.getItem('votos_compartilhados')) || [];
-        const votosDaSessao = votosCompartilhados.filter(voto => voto.sessao_id === sessaoCompartilhamento);
-        
-        if (votosDaSessao.length > 0) {
-            votosDaSessao.forEach(voto => {
-                // Evitar processar próprio voto
-                if (voto.timestamp && (Date.now() - new Date(voto.timestamp).getTime()) > 5000) {
-                    // Salvar voto recebido localmente
-                    salvarVotoLocal(voto);
-                    showNotification(`Voto recebido: ${voto.candidato}`, 'info');
-                }
-            });
-        }
-    }, 5000); // Verificar a cada 5 segundos
-}
-
-// Salvar voto recebido localmente
-function salvarVotoLocal(votoData) {
-    let votos = JSON.parse(localStorage.getItem('votos')) || [];
-    
-    // Verificar se voto já existe
-    const votoExiste = votos.some(v => 
-        v.cargo === votoData.cargo && 
-        v.numero === votoData.numero && 
-        v.timestamp === votoData.timestamp
-    );
-    
-    if (!votoExiste) {
-        votos.push(votoData);
-        localStorage.setItem('votos', JSON.stringify(votos));
-    }
-}
-
-// Inicialização
-async function inicializar() {
-    carregarConfiguracao();
-    carregarCandidatos();
-    atualizarDisplay();
-    atualizarInterfaceAdmin();
-    aplicarTemaSalvo();
-    atualizarDisplayEleicao();
-    
-    // Verificar se há votos offline para sincronizar
+    // Mostra a notificação
     setTimeout(() => {
-        verificarVotosPendentes();
-    }, 2000);
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+    }, 100);
     
-    // Verificar parâmetros de sessão na URL
-    verificarParametroSessao();
+    // Remove após 3 segundos
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
-// Timer de votação - MODIFICADO: não inicia automaticamente
+// ==============================================
+// TESTE DE CONEXÃO COM SUPABASE
+// ==============================================
+async function testarConexaoSupabase() {
+    try {
+        const { error } = await supabase
+            .from('candidatos')
+            .select('count')
+            .limit(1);
+            
+        if (error) {
+            console.error('Erro na conexão com Supabase:', error);
+            showNotification('Usando armazenamento local', 'warning');
+            return false;
+        }
+        
+        console.log('Conexão com Supabase estabelecida com sucesso');
+        return true;
+    } catch (e) {
+        console.error('Erro ao testar conexão:', e);
+        showNotification('Usando armazenamento local', 'info');
+        return false;
+    }
+}
+
+// ==============================================
+// GERENCIAMENTO DE CANDIDATOS
+// ==============================================
+async function carregarCandidatos() {
+    try {
+        const { data, error } = await supabase
+            .from('candidatos')
+            .select('numero, nome, partido')
+            .order('numero', { ascending: true });
+            
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            configuracao.candidatos = {};
+            data.forEach(candidato => {
+                configuracao.candidatos[candidato.numero] = {
+                    nome: candidato.nome,
+                    partido: candidato.partido
+                };
+            });
+            
+            localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
+            showNotification('Candidatos carregados do servidor!', 'success');
+        } else {
+            const saved = localStorage.getItem('candidatos');
+            if (saved) {
+                configuracao.candidatos = JSON.parse(saved);
+                showNotification('Candidatos carregados localmente', 'info');
+            }
+        }
+    } catch (e) {
+        console.error('Erro ao carregar candidatos:', e);
+        const saved = localStorage.getItem('candidatos');
+        if (saved) configuracao.candidatos = JSON.parse(saved);
+    }
+}
+
+async function salvarCandidatoSupabase(numero, nome, partido) {
+    try {
+        const { error } = await supabase
+            .from('candidatos')
+            .insert([{ numero, nome: nome.toUpperCase(), partido: partido.toUpperCase() }]);
+            
+        return !error;
+    } catch (e) {
+        console.error('Erro ao salvar candidato:', e);
+        return false;
+    }
+}
+
+async function removerCandidatoSupabase(numero) {
+    try {
+        const { error } = await supabase
+            .from('candidatos')
+            .delete()
+            .eq('numero', numero);
+            
+        return !error;
+    } catch (e) {
+        console.error('Erro ao remover candidato:', e);
+        return false;
+    }
+}
+
+// ==============================================
+// TIMER DE VOTAÇÃO
+// ==============================================
 function iniciarTimer() {
     pararTimer();
-    
     tempoVotacao = 30;
     timerAtivo = true;
-    
     atualizarTimer();
     
     timerInterval = setInterval(() => {
         tempoVotacao--;
         atualizarTimer();
-        
         if (tempoVotacao <= 0) {
             pararTimer();
             showNotification('Tempo esgotado! Voto em branco registrado.', 'warning');
@@ -310,17 +183,11 @@ function atualizarTimer() {
     const timerElement = document.getElementById('timer');
     const timerContainer = document.querySelector('.timer-container');
     
-    if (timerElement) {
-        timerElement.textContent = tempoVotacao;
-    }
-    
+    if (timerElement) timerElement.textContent = tempoVotacao;
     if (timerContainer) {
         timerContainer.classList.remove('warning', 'danger');
-        if (tempoVotacao <= 10) {
-            timerContainer.classList.add('danger');
-        } else if (tempoVotacao <= 20) {
-            timerContainer.classList.add('warning');
-        }
+        if (tempoVotacao <= 10) timerContainer.classList.add('danger');
+        else if (tempoVotacao <= 20) timerContainer.classList.add('warning');
     }
 }
 
@@ -331,26 +198,22 @@ function brancoAutomatico() {
         timestamp: new Date().toISOString(),
         candidato: 'BRANCO (automático)'
     });
-    
     corrige();
 }
 
-// Tema claro/escuro
+// ==============================================
+// TEMA CLARO/ESCURO
+// ==============================================
 function toggleTheme() {
     const body = document.body;
-    const themeToggle = document.querySelector('.theme-toggle');
+    const isLight = body.classList.contains('light-theme');
     
-    if (body.classList.contains('light-theme')) {
-        body.classList.remove('light-theme');
-        body.classList.add('dark-theme');
-        themeToggle.textContent = '☀️';
-        localStorage.setItem('tema', 'escuro');
-    } else {
-        body.classList.remove('dark-theme');
-        body.classList.add('light-theme');
-        themeToggle.textContent = '🌙';
-        localStorage.setItem('tema', 'claro');
-    }
+    body.classList.remove(isLight ? 'light-theme' : 'dark-theme');
+    body.classList.add(isLight ? 'dark-theme' : 'light-theme');
+    
+    const themeToggle = document.querySelector('.theme-toggle');
+    themeToggle.textContent = isLight ? '☀️' : '🌙';
+    localStorage.setItem('tema', isLight ? 'escuro' : 'claro');
 }
 
 function aplicarTemaSalvo() {
@@ -365,11 +228,12 @@ function aplicarTemaSalvo() {
         document.body.classList.remove('dark-theme');
         document.body.classList.add('light-theme');
         themeToggle.textContent = '🌙';
-        localStorage.setItem('tema', 'claro');
     }
 }
 
-// Modo Admin
+// ==============================================
+// MODO ADMINISTRADOR
+// ==============================================
 function toggleAdmin() {
     if (!modoAdmin) {
         const senha = prompt("🔐 Digite a senha de administrador:");
@@ -401,7 +265,7 @@ function preencherFormularioAdmin() {
     atualizarListaCandidatos();
 }
 
-function adicionarCandidato() {
+async function adicionarCandidato() {
     const numero = document.getElementById('numero-candidato').value.padStart(2, '0');
     const nome = document.getElementById('nome-candidato').value.trim();
     const partido = document.getElementById('partido-candidato').value.trim();
@@ -421,10 +285,16 @@ function adicionarCandidato() {
         return;
     }
     
+    // Tentar salvar no Supabase
+    const sucessoOnline = await salvarCandidatoSupabase(numero, nome, partido);
+    
+    // Salvar localmente de qualquer forma
     configuracao.candidatos[numero] = {
         nome: nome.toUpperCase(),
         partido: partido.toUpperCase()
     };
+    
+    localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
     
     document.getElementById('numero-candidato').value = '';
     document.getElementById('nome-candidato').value = '';
@@ -432,16 +302,27 @@ function adicionarCandidato() {
     
     atualizarListaCandidatos();
     salvarConfiguracao();
-    showNotification('Candidato adicionado com sucesso!');
+    
+    if (sucessoOnline) {
+        showNotification('Candidato adicionado com sucesso!');
+    } else {
+        showNotification('Candidato salvo localmente (sem conexão)', 'warning');
+    }
 }
 
-function removerCandidato(numero) {
-    if (confirm(`Tem certeza que deseja remover o candidato ${numero}?`)) {
-        delete configuracao.candidatos[numero];
-        atualizarListaCandidatos();
-        salvarConfiguracao();
-        showNotification('Candidato removido com sucesso!');
-    }
+async function removerCandidato(numero) {
+    if (!confirm(`Tem certeza que deseja remover o candidato ${numero}?`)) return;
+    
+    // Tentar remover do Supabase
+    await removerCandidatoSupabase(numero);
+    
+    // Remover localmente
+    delete configuracao.candidatos[numero];
+    localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
+    
+    atualizarListaCandidatos();
+    salvarConfiguracao();
+    showNotification('Candidato removido com sucesso!');
 }
 
 function atualizarListaCandidatos() {
@@ -467,23 +348,13 @@ function salvarConfiguracao() {
     configuracao.titulo = document.getElementById('titulo-eleicao').value;
     configuracao.cargo = document.getElementById('cargo-eleicao').value;
     localStorage.setItem('configuracaoEleicao', JSON.stringify(configuracao));
-    localStorage.setItem('candidatos', JSON.stringify(configuracao.candidatos));
     showNotification('Configuração salva com sucesso!');
     atualizarDisplayEleicao();
 }
 
 function carregarConfiguracao() {
     const saved = localStorage.getItem('configuracaoEleicao');
-    if (saved) {
-        configuracao = JSON.parse(saved);
-    }
-}
-
-function carregarCandidatos() {
-    const saved = localStorage.getItem('candidatos');
-    if (saved) {
-        configuracao.candidatos = JSON.parse(saved);
-    }
+    if (saved) configuracao = JSON.parse(saved);
 }
 
 function atualizarDisplayEleicao() {
@@ -494,29 +365,23 @@ function atualizarDisplayEleicao() {
     if (cargoDisplay) cargoDisplay.textContent = configuracao.cargo;
 }
 
-// Funções de votação - MODIFICADO: timer inicia apenas ao pressionar tecla
+// ==============================================
+// FUNÇÕES DE VOTAÇÃO
+// ==============================================
 function pressionarTecla(numero) {
-    // Iniciar timer apenas se não estiver ativo
-    if (!timerAtivo) {
-        iniciarTimer();
-    }
+    if (!timerAtivo) iniciarTimer();
     
     if (votoAtual.length < 2) {
         votoAtual += numero;
         atualizarDisplay();
-        
-        if (votoAtual.length === 2) {
-            mostrarCandidato();
-        }
+        if (votoAtual.length === 2) mostrarCandidato();
     }
 }
 
 function atualizarDisplay() {
     for (let i = 0; i < 2; i++) {
         const elemento = document.getElementById(`numero${i + 1}`);
-        if (elemento) {
-            elemento.textContent = votoAtual[i] || '_';
-        }
+        if (elemento) elemento.textContent = votoAtual[i] || '_';
     }
 }
 
@@ -535,11 +400,7 @@ function mostrarCandidato() {
 }
 
 function branco() {
-    // Iniciar timer apenas se não estiver ativo
-    if (!timerAtivo) {
-        iniciarTimer();
-    }
-    
+    if (!timerAtivo) iniciarTimer();
     votoAtual = 'BR';
     const nomeElemento = document.getElementById('nome-candidato-display');
     const partidoElemento = document.getElementById('partido-display');
@@ -550,11 +411,7 @@ function branco() {
 }
 
 function corrige() {
-    // Iniciar timer apenas se não estiver ativo
-    if (!timerAtivo) {
-        iniciarTimer();
-    }
-    
+    if (!timerAtivo) iniciarTimer();
     votoAtual = '';
     const nomeElemento = document.getElementById('nome-candidato-display');
     const partidoElemento = document.getElementById('partido-display');
@@ -580,7 +437,6 @@ async function confirma() {
     };
     
     await salvarVoto(votoData);
-    
     showNotification('Voto confirmado com sucesso!');
     pararTimer();
     
@@ -589,7 +445,9 @@ async function confirma() {
     }, 2000);
 }
 
-// Função para salvar voto (local apenas, já que o Supabase está com problemas)
+// ==============================================
+// SALVAR VOTOS NO SUPABASE
+// ==============================================
 async function salvarVoto(votoData) {
     try {
         // Salvar no localStorage
@@ -597,33 +455,95 @@ async function salvarVoto(votoData) {
         votos.push(votoData);
         localStorage.setItem('votos', JSON.stringify(votos));
         
-        // Compartilhar voto se estiver em sessão
-        if (sessaoCompartilhamento) {
-            await compartilharVoto(votoData);
+        // Tentar salvar no Supabase
+        const { error } = await supabase
+            .from('votos')
+            .insert([{
+                cargo: votoData.cargo,
+                numero: votoData.numero,
+                candidato: votoData.candidato
+            }]);
+            
+        if (error) {
+            console.error('Erro ao salvar no Supabase:', error);
+            
+            // Adicionar para sincronização posterior
+            let pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+            pendentes.push(votoData);
+            localStorage.setItem('votosPendentes', JSON.stringify(pendentes));
+            
+            showNotification('Voto salvo localmente (sem conexão)', 'info');
+            return false;
         }
         
         showNotification('Voto salvo com sucesso!', 'success');
+        return true;
         
     } catch (e) {
         console.error('Erro ao salvar voto:', e);
         showNotification('Erro ao salvar voto', 'error');
+        return false;
     }
 }
 
-// Verificar votos pendentes
-function verificarVotosPendentes() {
-    const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
-    if (pendentes.length > 0) {
-        showNotification(`${pendentes.length} votos pendentes para sincronizar`, 'info');
-    }
-}
-
-// Sincronizar votos offline com Supabase (função placeholder)
+// ==============================================
+// SINCRONIZAÇÃO DE VOTOS OFFLINE
+// ==============================================
 async function sincronizarVotosOffline() {
-    showNotification('Funcionalidade de sincronização com Supabase temporariamente desativada', 'info');
+    const votosPendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+    
+    if (votosPendentes.length === 0) {
+        showNotification('Nenhum voto pendente para sincronizar.', 'info');
+        return;
+    }
+    
+    isSyncing = true;
+    showNotification(`Sincronizando ${votosPendentes.length} votos...`, 'info');
+    
+    let successCount = 0;
+    const novosPendentes = [];
+    
+    for (const voto of votosPendentes) {
+        try {
+            const { error } = await supabase
+                .from('votos')
+                .insert([{
+                    cargo: voto.cargo,
+                    numero: voto.numero,
+                    candidato: voto.candidato
+                }]);
+                
+            if (error) {
+                novosPendentes.push(voto);
+                continue;
+            }
+            
+            successCount++;
+            
+        } catch (e) {
+            novosPendentes.push(voto);
+        }
+        
+        // Pequena pausa para não sobrecarregar o servidor
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Atualizar lista de pendentes
+    localStorage.setItem('votosPendentes', JSON.stringify(novosPendentes));
+    isSyncing = false;
+    
+    if (successCount > 0) {
+        showNotification(`${successCount} votos sincronizados com sucesso!`, 'success');
+    }
+    
+    if (novosPendentes.length > 0) {
+        showNotification(`${novosPendentes.length} votos não puderam ser sincronizados`, 'warning');
+    }
 }
 
-// Gerenciamento de dados
+// ==============================================
+// EXPORTAR E VISUALIZAR RESULTADOS
+// ==============================================
 async function exportarResultados() {
     try {
         const votos = JSON.parse(localStorage.getItem('votos')) || [];
@@ -644,7 +564,16 @@ async function exportarResultados() {
             exportadoEm: new Date().toISOString()
         };
         
-        // Fazer download do JSON localmente
+        // Salvar no Supabase
+        const { error } = await supabase
+            .from('resultados_exportados')
+            .insert([{ dados: dados }]);
+            
+        if (error) {
+            console.error('Erro ao salvar resultados:', error);
+        }
+        
+        // Fazer download
         fazerDownload(JSON.stringify(dados, null, 2), 'resultados-eleicao.json');
         showNotification(`Resultados exportados! Total: ${todosVotos.length} votos`);
         
@@ -695,52 +624,30 @@ function visualizarResultados() {
     }
     
     const resultados = calcularResultados(todosVotos);
-    
-    // Mostrar em modal
     mostrarResultadosModal(resultados, todosVotos.length);
 }
 
 function mostrarResultadosModal(resultados, totalVotos) {
-    // Criar modal
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); display: flex; justify-content: center;
+        align-items: center; z-index: 1000;
     `;
     
     modal.innerHTML = `
         <div class="modal-content" style="
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+            background: white; padding: 20px; border-radius: 10px;
+            max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;
         ">
             <div class="modal-header" style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 10px;
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;
             ">
                 <h2 style="margin: 0;">Resultados da Eleição</h2>
                 <button class="close-modal" onclick="this.parentElement.parentElement.parentElement.remove()" style="
-                    background: none;
-                    border: none;
-                    font-size: 24px;
-                    cursor: pointer;
+                    background: none; border: none; font-size: 24px; cursor: pointer;
                 ">×</button>
             </div>
             <div class="modal-body">
@@ -748,18 +655,12 @@ function mostrarResultadosModal(resultados, totalVotos) {
                 <div class="results-list">
                     ${resultados.map((resultado, index) => `
                         <div class="result-item" style="
-                            padding: 10px;
-                            margin: 10px 0;
-                            border-radius: 5px;
+                            padding: 10px; margin: 10px 0; border-radius: 5px;
                             background: ${index === 0 ? '#e8f5e9' : '#f5f5f5'};
                             border-left: 4px solid ${index === 0 ? '#4CAF50' : '#9e9e9e'};
                         ">
-                            <div>
-                                <strong>${resultado.numero} - ${resultado.candidato}</strong>
-                            </div>
-                            <div>
-                                ${resultado.votos} votos (${((resultado.votos / totalVotos) * 100).toFixed(1)}%)
-                            </div>
+                            <div><strong>${resultado.numero} - ${resultado.candidato}</strong></div>
+                            <div>${resultado.votos} votos (${((resultado.votos / totalVotos) * 100).toFixed(1)}%)</div>
                         </div>
                     `).join('')}
                 </div>
@@ -768,15 +669,14 @@ function mostrarResultadosModal(resultados, totalVotos) {
     `;
     
     document.body.appendChild(modal);
-    
-    // Fechar modal ao clicar fora
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-        }
+        if (e.target === modal) modal.remove();
     });
 }
 
+// ==============================================
+// LIMPEZA DE DADOS
+// ==============================================
 function limparVotos() {
     if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os votos registrados. Tem certeza?')) {
         localStorage.removeItem('votos');
@@ -786,7 +686,7 @@ function limparVotos() {
 }
 
 function limparTudo() {
-    if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os dados (candidatos, votos e configuração). Tem certeza?')) {
+    if (confirm('⚠️ ATENÇÃO: Isso apagará TODOS os dados. Tem certeza?')) {
         localStorage.removeItem('configuracaoEleicao');
         localStorage.removeItem('votos');
         localStorage.removeItem('votosPendentes');
@@ -803,17 +703,33 @@ function limparTudo() {
     }
 }
 
-function atualizarInterfaceAdmin() {
-    // Atualiza a interface quando necessário
+// ==============================================
+// INICIALIZAÇÃO
+// ==============================================
+async function inicializar() {
+    await testarConexaoSupabase();
+    carregarConfiguracao();
+    await carregarCandidatos();
+    atualizarDisplay();
+    atualizarInterfaceAdmin();
+    aplicarTemaSalvo();
+    atualizarDisplayEleicao();
+    
+    // Verificar votos pendentes
+    setTimeout(() => {
+        const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+        if (pendentes.length > 0) {
+            showNotification(`${pendentes.length} votos pendentes para sincronizar`, 'info');
+        }
+    }, 2000);
 }
 
-// Inicializar quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    inicializar();
-    // Timer não inicia mais automaticamente
-});
+// ==============================================
+// EVENT LISTENERS
+// ==============================================
+document.addEventListener('DOMContentLoaded', inicializar);
 
-// Teclado numérico físico também funciona
+// Teclado numérico físico
 document.addEventListener('keydown', function(event) {
     if (event.key >= '0' && event.key <= '9') {
         pressionarTecla(parseInt(event.key));
@@ -825,3 +741,13 @@ document.addEventListener('keydown', function(event) {
         branco();
     }
 });
+
+// Verificar conexão periodicamente
+setInterval(() => {
+    if (navigator.onLine) {
+        const pendentes = JSON.parse(localStorage.getItem('votosPendentes')) || [];
+        if (pendentes.length > 0 && !isSyncing) {
+            sincronizarVotosOffline();
+        }
+    }
+}, 30000);
